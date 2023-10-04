@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "DataFrame-Cookbook",
+    "section": "",
+    "text": "Post With Code\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\nusing DataFrame construct cotingencytable\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame combine function\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame two-way-table\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\nanova\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFramesMeta Tutorial\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nSep 11, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/two-way-table/index.html",
+    "href": "posts/two-way-table/index.html",
+    "title": "DataFrame two-way-table",
+    "section": "",
+    "text": "Note\n\n\n\n生成 two-way-table\n\n使用unstack方法生成双向表\n使用combine 方法添加列\n使用insert 方法添加行\n\n\n\n\ninclude(\"../utils.jl\")\nusing  RCall\nusing  GLMakie,DataFrames,Pipe,PrettyTables\nusing  StatsBase,TableTransforms,Random,TimeSeries,Dates\nRandom.seed!(34343)\n\nTaskLocalRNG()\n\n\n\n1. load data\n\n desc=Stat2Table(1431,\"FranticFingers\",\"stock time series\",[\"Date\", \"Price\", \"Change\", \"Volume\"])\n data=@pipe load_rda(desc.name)\n display(first(data,5))\n\n5×4 DataFrame\n\n\n\nRow\nID\nRate\nSubj\nDrug\n\n\n\nInt32\nInt32\nCat…\nCat…\n\n\n\n\n1\n1\n11\nA\nPl\n\n\n2\n2\n56\nB\nPl\n\n\n3\n3\n15\nC\nPl\n\n\n4\n4\n6\nD\nPl\n\n\n5\n5\n26\nA\nCa\n\n\n\n\n\n\n\n\n2. two-way-table\n:Subj 做为列, :Drug 作为行,  :Rate 是值\n\ntwoway_table=unstack(data,:Subj,:Drug,:Rate)\n\n4×4 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\n\n\n\n\n1\nA\n11\n26\n20\n\n\n2\nB\n56\n83\n71\n\n\n3\nC\n15\n34\n41\n\n\n4\nD\n6\n13\n32\n\n\n\n\n\n\n\n\n3. add :Ave Col\n\ntwt=combine(twoway_table,:,[:Pl,:Ca,:Th]=&gt;((a,b,c)-&gt;mean([a,b,c]))=&gt;:Ave)\n\n4×5 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\nAve\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\nFloat64\n\n\n\n\n1\nA\n11\n26\n20\n19.0\n\n\n2\nB\n56\n83\n71\n70.0\n\n\n3\nC\n15\n34\n41\n30.0\n\n\n4\nD\n6\n13\n32\n17.0\n\n\n\n\n\n\n\n\n4. insert Ave Row\n\ninsert!(twt, 5 ,[\"Ave\",mean.(eachcol(twt)[2:end])...])\n\n5×5 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\nAve\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\nFloat64\n\n\n\n\n1\nA\n11\n26\n20\n19.0\n\n\n2\nB\n56\n83\n71\n70.0\n\n\n3\nC\n15\n34\n41\n30.0\n\n\n4\nD\n6\n13\n32\n17.0\n\n\n5\nAve\n22\n39\n41\n34.0"
+  },
+  {
+    "objectID": "posts/combine/index.html",
+    "href": "posts/combine/index.html",
+    "title": "DataFrame combine function",
+    "section": "",
+    "text": "using DataFrames,PrettyTables\ndf=DataFrame(a=1:3, b=4:6)\n\n3×2 DataFrame\n\n\n\nRow\na\nb\n\n\n\nInt64\nInt64\n\n\n\n\n1\n1\n4\n\n\n2\n2\n5\n\n\n3\n3\n6\n\n\n\n\n\n\n\ncombine(df, :a =&gt; sum, nrow, renamecols=false)  \n\n1×2 DataFrame\n\n\n\nRow\na\nnrow\n\n\n\nInt64\nInt64\n\n\n\n\n1\n6\n3"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "posts/contingencytable/index.html",
+    "href": "posts/contingencytable/index.html",
+    "title": "using DataFrame construct cotingencytable",
+    "section": "",
+    "text": "Note\n\n\n\ncotingencytable是理解和研究条件概率的工具\n\nref:\n列联表(双向表,cotingencytable,two-way table),是研究两个变量 不同水平(变量取值)之间相互关系的图表展示方法\n表中最大行和最大列是边缘分布\n表中单元格取值是两个变量的联合分布\n手动输入可以使用:\ninclude(\"../utils.jl\")\nusing  DataFrames\nusing  Random\nRandom.seed!(34343)\n\nTaskLocalRNG()"
+  },
+  {
+    "objectID": "posts/contingencytable/index.html#load-data",
+    "href": "posts/contingencytable/index.html#load-data",
+    "title": "using DataFrame construct cotingencytable",
+    "section": "1. load data",
+    "text": "1. load data\n\n desc=Stat2Table(0,\"flavor_preference\",\"icecream flavor\",[])\n data=@pipe load_csv(desc.name)\n show(first(data,10))\n\n6×4 DataFrame\n Row │ Gender   Flavor      Frequency  Row%    \n     │ String7  String15    Int64      Float64 \n─────┼─────────────────────────────────────────\n   1 │ Female   Chocolate          37     56.0\n   2 │ Female   Strawberry         17     25.8\n   3 │ Female   Vanilla            12     18.2\n   4 │ Male     Chocolate          21     29.6\n   5 │ Male     Strawberry         18     25.4\n   6 │ Male     Vanilla            32     45.0"
+  },
+  {
+    "objectID": "posts/contingencytable/index.html#two-way-table",
+    "href": "posts/contingencytable/index.html#two-way-table",
+    "title": "using DataFrame construct cotingencytable",
+    "section": "2. two-way-table",
+    "text": "2. two-way-table\n:Gender 做为列, :Flavour 作为行,  :Frequency 是值\n\ntwoway_table=unstack(data,:Gender,:Flavor,:Frequency)\n\n2×4 DataFrame\n\n\n\nRow\nGender\nChocolate\nStrawberry\nVanilla\n\n\n\nString7\nInt64?\nInt64?\nInt64?\n\n\n\n\n1\nFemale\n37\n17\n12\n\n\n2\nMale\n21\n18\n32"
+  },
+  {
+    "objectID": "posts/contingencytable/index.html#add-total-col",
+    "href": "posts/contingencytable/index.html#add-total-col",
+    "title": "using DataFrame construct cotingencytable",
+    "section": "3. add :Total Col",
+    "text": "3. add :Total Col\n\ntwt=combine(twoway_table,:,[:Chocolate,:Strawberry,:Vanilla]=&gt;((a,b,c)-&gt;sum([a,b,c]))=&gt;:Total)\n\n2×5 DataFrame\n\n\n\nRow\nGender\nChocolate\nStrawberry\nVanilla\nTotal\n\n\n\nString7\nInt64?\nInt64?\nInt64?\nInt64\n\n\n\n\n1\nFemale\n37\n17\n12\n66\n\n\n2\nMale\n21\n18\n32\n71"
+  },
+  {
+    "objectID": "posts/contingencytable/index.html#add-total-row",
+    "href": "posts/contingencytable/index.html#add-total-row",
+    "title": "using DataFrame construct cotingencytable",
+    "section": "4. add :Total Row",
+    "text": "4. add :Total Row\n\ninsert!(twt, 3 ,[\"Total\",sum.(eachcol(twt)[2:end])...])\n\n3×5 DataFrame\n\n\n\nRow\nGender\nChocolate\nStrawberry\nVanilla\nTotal\n\n\n\nString7\nInt64?\nInt64?\nInt64?\nInt64\n\n\n\n\n1\nFemale\n37\n17\n12\n66\n\n\n2\nMale\n21\n18\n32\n71\n\n\n3\nTotal\n58\n35\n44\n137\n\n\n\n\n\n\n\n5. read table\n建立表格后,就可以用来计算条件概率,按照dataframe的行列读取方式\n\n\n5.1 边缘概率\n统计参加试验的女性总人数\n\n \"参加实验的女性总人数\"=&gt;twt[1,:Total]\n\n\"参加实验的女性总人数\" =&gt; 66\n\n\n计算试验中喜欢巧克力口味冰激凌的总人数\n\n \"喜欢巧克力冰激凌总人数\"=&gt;twt[3,:Chocolate]\n\n\"喜欢巧克力冰激凌总人数\" =&gt; 58\n\n\n参加试验的总数\n\n\"参加试验的总数\"=&gt;twt[3,:Total]\n\n\"参加试验的总数\" =&gt; 137"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/mammalsleep/index.html",
+    "href": "posts/mammalsleep/index.html",
+    "title": "DataFramesMeta Tutorial",
+    "section": "",
+    "text": "Note\n\n\n\nmammal sleep tutorial\n\n\n\ninclude(\"../utils.jl\")\nusing  RCall\nusing  GLMakie,DataFrames,Pipe,PrettyTables,DataFramesMeta\nusing  StatsBase,TableTransforms,Random,TimeSeries,Dates\nRandom.seed!(34343)\n\nTaskLocalRNG()\n\n\n\n1. load data\n\n desc=Stat2Table(1431,\"mammals\",\"sleep in mammals\",[])\n msleep=@pipe load_rda(desc.name)\n show(first(msleep,10))\n\n10×11 DataFrame\n Row │ species                 body_wt   brain_wt  non_dreaming  dreaming   to ⋯\n     │ Cat…                    Float64   Float64   Float64?      Float64?   Fl ⋯\n─────┼──────────────────────────────────────────────────────────────────────────\n   1 │ Africanelephant         6654.0      5712.0     missing    missing       ⋯\n   2 │ Africangiantpouchedrat     1.0         6.6           6.3        2.0\n   3 │ ArcticFox                  3.385      44.5     missing    missing   \n   4 │ Arcticgroundsquirrel       0.92        5.7     missing    missing   \n   5 │ Asianelephant           2547.0      4603.0           2.1        1.8     ⋯\n   6 │ Baboon                    10.55      179.5           9.1        0.7\n   7 │ Bigbrownbat                0.023       0.3          15.8        3.9\n   8 │ Braziliantapir           160.0       169.0           5.2        1.0\n   9 │ Cat                        3.3        25.6          10.9        3.6     ⋯\n  10 │ Chimpanzee                52.16      440.0           8.3        1.4\n                                                               6 columns omitted\n\n\n\n\n2. names\n\nshow(names(msleep))\n\n[\"species\", \"body_wt\", \"brain_wt\", \"non_dreaming\", \"dreaming\", \"total_sleep\", \"life_span\", \"gestation\", \"predation\", \"exposure\", \"danger\"]\n\n\n\n\n3. Selecting Columns Using @select\n\n@select msleep :species :total_sleep\n\n62×2 DataFrame37 rows omitted\n\n\n\nRow\nspecies\ntotal_sleep\n\n\n\nCat…\nFloat64?\n\n\n\n\n1\nAfricanelephant\n3.3\n\n\n2\nAfricangiantpouchedrat\n8.3\n\n\n3\nArcticFox\n12.5\n\n\n4\nArcticgroundsquirrel\n16.5\n\n\n5\nAsianelephant\n3.9\n\n\n6\nBaboon\n9.8\n\n\n7\nBigbrownbat\n19.7\n\n\n8\nBraziliantapir\n6.2\n\n\n9\nCat\n14.5\n\n\n10\nChimpanzee\n9.7\n\n\n11\nChinchilla\n12.5\n\n\n12\nCow\n3.9\n\n\n13\nDeserthedgehog\n10.3\n\n\n⋮\n⋮\n⋮\n\n\n51\nRockhyrax(Heterob)\n6.6\n\n\n52\nRockhyrax(Procaviahab)\n5.4\n\n\n53\nRoedeer\n2.6\n\n\n54\nSheep\n3.8\n\n\n55\nSlowloris\n11.0\n\n\n56\nStarnosedmole\n10.3\n\n\n57\nTenrec\n13.3\n\n\n58\nTreehyrax\n5.4\n\n\n59\nTreeshrew\n15.8\n\n\n60\nVervet\n10.3\n\n\n61\nWateropossum\n19.4\n\n\n62\nYellow-belliedmarmot\nmissing\n\n\n\n\n\n\n\n\n4. rsubset\n\n@rsubset msleep :total_sleep &gt; 16\n\n8×11 DataFrame\n\n\n\nRow\nspecies\nbody_wt\nbrain_wt\nnon_dreaming\ndreaming\ntotal_sleep\nlife_span\ngestation\npredation\nexposure\ndanger\n\n\n\nCat…\nFloat64\nFloat64\nFloat64?\nFloat64?\nFloat64?\nFloat64?\nFloat64?\nInt32\nInt32\nInt32\n\n\n\n\n1\nArcticgroundsquirrel\n0.92\n5.7\nmissing\nmissing\n16.5\nmissing\n25.0\n5\n2\n3\n\n\n2\nBigbrownbat\n0.023\n0.3\n15.8\n3.9\n19.7\n19.0\n35.0\n1\n1\n1\n\n\n3\nGiantarmadillo\n60.0\n81.0\n12.0\n6.1\n18.1\n7.0\nmissing\n1\n1\n1\n\n\n4\nLittlebrownbat\n0.01\n0.25\n17.9\n2.0\n19.9\n24.0\n50.0\n1\n1\n1\n\n\n5\nNAmericanopossum\n1.7\n6.3\n13.8\n5.6\n19.4\n5.0\n12.0\n2\n1\n1\n\n\n6\nNine-bandedarmadillo\n3.5\n10.8\n14.3\n3.1\n17.4\n6.5\n120.0\n2\n1\n1\n\n\n7\nOwlmonkey\n0.48\n15.5\n15.2\n1.8\n17.0\n12.0\n140.0\n2\n2\n2\n\n\n8\nWateropossum\n3.5\n3.9\n12.8\n6.6\n19.4\n3.0\n14.0\n2\n1\n1\n\n\n\n\n\n\n\n\n5. using @chain from Chain.jl\n\n@chain msleep begin\n           @select :species :total_sleep\n           @rsubset :total_sleep &gt; 16\n       end\n\n8×2 DataFrame\n\n\n\nRow\nspecies\ntotal_sleep\n\n\n\nCat…\nFloat64?\n\n\n\n\n1\nArcticgroundsquirrel\n16.5\n\n\n2\nBigbrownbat\n19.7\n\n\n3\nGiantarmadillo\n18.1\n\n\n4\nLittlebrownbat\n19.9\n\n\n5\nNAmericanopossum\n19.4\n\n\n6\nNine-bandedarmadillo\n17.4\n\n\n7\nOwlmonkey\n17.0\n\n\n8\nWateropossum\n19.4"
+  }
+]

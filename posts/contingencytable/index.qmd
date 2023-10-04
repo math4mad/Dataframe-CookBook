@@ -1,0 +1,78 @@
+---
+title: "using DataFrame construct cotingencytable"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia]
+image: "image.jpg"
+---
+
+:::{.callout-note}
+   **cotingencytable**是理解和研究条件概率的工具 
+   
+   - [**ref:**](https://statisticsbyjim.com/basics/contingency-table/)
+   
+   - 列联表(双向表,cotingencytable,two-way table),是研究两个变量
+     不同水平(变量取值)之间相互关系的图表展示方法
+   - 表中最大行和最大列是边缘分布
+   - 表中单元格取值是两个变量的联合分布
+:::
+
+手动输入可以使用:
+
+::: {.callout-tip title="build two-way table in this page "}
+   [`RapidTable`](https://www.rapidtables.com/tools/table-chart.html#)
+:::
+
+```{julia}
+include("../utils.jl")
+using  DataFrames
+using  Random
+Random.seed!(34343)
+```
+
+## 1. load data
+
+```{julia}
+ desc=Stat2Table(0,"flavor_preference","icecream flavor",[])
+ data=@pipe load_csv(desc.name)
+ show(first(data,10))
+```
+
+
+## 2. two-way-table
+`:Gender 做为列, :Flavour 作为行,  :Frequency 是值`
+```{julia}
+
+twoway_table=unstack(data,:Gender,:Flavor,:Frequency)
+```
+
+## 3. add :Total  Col
+
+```{julia}
+twt=combine(twoway_table,:,[:Chocolate,:Strawberry,:Vanilla]=>((a,b,c)->sum([a,b,c]))=>:Total)
+```
+
+## 4. add :Total Row  
+
+```{julia}
+insert!(twt, 3 ,["Total",sum.(eachcol(twt)[2:end])...])
+```
+
+### 5. read table
+建立表格后,就可以用来计算条件概率,按照`dataframe`的行列读取方式
+
+### 5.1   边缘概率
+统计参加试验的女性总人数
+```{julia}
+ "参加实验的女性总人数"=>twt[1,:Total]
+```
+
+计算试验中喜欢巧克力口味冰激凌的总人数
+```{julia}
+ "喜欢巧克力冰激凌总人数"=>twt[3,:Chocolate]
+```
+
+参加试验的总数
+```{julia}
+"参加试验的总数"=>twt[3,:Total]
+```

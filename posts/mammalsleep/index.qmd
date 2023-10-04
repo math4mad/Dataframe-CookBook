@@ -1,0 +1,56 @@
+---
+title: "DataFramesMeta Tutorial"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia]
+image: "image.jpg"
+---
+
+:::{.callout-note}
+   **mammal sleep  tutorial** 
+:::
+
+```{julia}
+include("../utils.jl")
+using  RCall
+using  GLMakie,DataFrames,Pipe,PrettyTables,DataFramesMeta
+using  StatsBase,TableTransforms,Random,TimeSeries,Dates
+Random.seed!(34343)
+```
+
+
+### 1. load data
+
+```{julia}
+ desc=Stat2Table(1431,"mammals","sleep in mammals",[])
+ msleep=@pipe load_rda(desc.name)
+ show(first(msleep,10))
+```
+
+### 2.  names
+
+```{julia}
+show(names(msleep))
+```
+
+### 3. Selecting Columns Using `@select`
+
+```{julia}
+@select msleep :species :total_sleep
+```
+
+### 4. `rsubset`
+```{julia}
+@rsubset msleep :total_sleep > 16
+```
+
+### 5. using `@chain ` from `Chain.jl`
+
+```{julia}
+@chain msleep begin
+           @select :species :total_sleep
+           @rsubset :total_sleep > 16
+       end
+```
+
+

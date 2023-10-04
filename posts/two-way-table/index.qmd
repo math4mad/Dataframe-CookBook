@@ -1,0 +1,52 @@
+---
+title: "DataFrame two-way-table"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia,anova]
+image: "image.jpg"
+---
+
+:::{.callout-note}
+   **生成 two-way-table** 
+   
+   1. 使用`unstack`方法生成双向表
+   2. 使用`combine` 方法添加列
+   3. 使用`insert`  方法添加行
+   
+:::
+
+```{julia}
+include("../utils.jl")
+using  RCall
+using  GLMakie,DataFrames,Pipe,PrettyTables
+using  StatsBase,TableTransforms,Random,TimeSeries,Dates
+Random.seed!(34343)
+```
+
+### 1. load data
+
+```{julia}
+ desc=Stat2Table(1431,"FranticFingers","stock time series",["Date", "Price", "Change", "Volume"])
+ data=@pipe load_rda(desc.name)
+ display(first(data,5))
+```
+
+### 2. two-way-table
+`:Subj 做为列, :Drug 作为行,  :Rate 是值`
+```{julia}
+
+twoway_table=unstack(data,:Subj,:Drug,:Rate)
+```
+
+### 3. add :Ave  Col
+
+```{julia}
+twt=combine(twoway_table,:,[:Pl,:Ca,:Th]=>((a,b,c)->mean([a,b,c]))=>:Ave)
+```
+
+### 4. insert Ave  Row
+
+```{julia}
+insert!(twt, 5 ,["Ave",mean.(eachcol(twt)[2:end])...])
+```
+

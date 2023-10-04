@@ -1,0 +1,19 @@
+---
+title: "DataFrame combine function"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia]
+image: "image.jpg"
+---
+
+```{julia}
+using DataFrames,PrettyTables
+df=DataFrame(a=1:3, b=4:6)
+
+```
+
+```{julia}
+combine(df, :a => sum, nrow, renamecols=false)  
+```
+
+
