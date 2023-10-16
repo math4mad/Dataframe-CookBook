@@ -1,0 +1,53 @@
+---
+title: "dataset feature  transformation"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia]
+image: "image.jpg"
+---
+
+:::{.callout-note title="简介"}
+   **botsonhousing-price-predicting**
+
+   对各feature做不同的变换 
+
+   feature 参见 :[Applied Multivariate Statistical Analysis | SpringerLink](https://link.springer.com/book/10.1007/978-3-030-26006-4)  p51
+
+   变换方法参见 : [TableTransforms-Functional](https://juliaml.github.io/TableTransforms.jl/dev/transforms/#Functional)
+:::
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+using  DataFrames,TableTransforms
+using  Random
+Random.seed!(34343)
+```
+
+## 2. load data
+```{julia}
+df=load_csv("BostonHousing")
+first(df,10)
+```
+
+## 3. tranformation
+```{julia}
+table=(eachcol(df))|>Functional(
+                  1=>log,
+                  2=>x->x/10,
+                  3=>log,
+                  4=>x->x,
+                  5=>log,
+                  6=>log,
+                  7=>x->(x^2.5)/10000,
+                  8=>log,
+                  9=>log,
+                  10=>log,
+                  11=>x->exp(0.4*x)/1000,
+                  12=>x->x/100,
+                  13=>x->sqrt(x),
+                  14=>log
+)
+first(table,10)
+```
+

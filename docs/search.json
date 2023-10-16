@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "DataFrame-Cookbook",
     "section": "",
-    "text": "Post With Code\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\nusing DataFrame construct cotingencytable\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame combine function\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame two-way-table\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\nanova\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFramesMeta Tutorial\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nSep 11, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "Post With Code\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\nusing DataFrame construct cotingencytable\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame combine function\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\ndataset feature transformation\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFrame two-way-table\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\nanova\n\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nDataFramesMeta Tutorial\n\n\n\n\n\n\n\ndataframe\n\n\ncode\n\n\njulia\n\n\n\n\n\n\n\n\n\n\n\nSep 14, 2023\n\n\nmath4mads\n\n\n\n\n\n\n  \n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nSep 11, 2023\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/two-way-table/index.html",
@@ -21,18 +21,32 @@
     "text": "Note\n\n\n\n生成 two-way-table\n\n使用unstack方法生成双向表\n使用combine 方法添加列\n使用insert 方法添加行\n\n\n\n\ninclude(\"../utils.jl\")\nusing  RCall\nusing  GLMakie,DataFrames,Pipe,PrettyTables\nusing  StatsBase,TableTransforms,Random,TimeSeries,Dates\nRandom.seed!(34343)\n\nTaskLocalRNG()\n\n\n\n1. load data\n\n desc=Stat2Table(1431,\"FranticFingers\",\"stock time series\",[\"Date\", \"Price\", \"Change\", \"Volume\"])\n data=@pipe load_rda(desc.name)\n display(first(data,5))\n\n5×4 DataFrame\n\n\n\nRow\nID\nRate\nSubj\nDrug\n\n\n\nInt32\nInt32\nCat…\nCat…\n\n\n\n\n1\n1\n11\nA\nPl\n\n\n2\n2\n56\nB\nPl\n\n\n3\n3\n15\nC\nPl\n\n\n4\n4\n6\nD\nPl\n\n\n5\n5\n26\nA\nCa\n\n\n\n\n\n\n\n\n2. two-way-table\n:Subj 做为列, :Drug 作为行,  :Rate 是值\n\ntwoway_table=unstack(data,:Subj,:Drug,:Rate)\n\n4×4 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\n\n\n\n\n1\nA\n11\n26\n20\n\n\n2\nB\n56\n83\n71\n\n\n3\nC\n15\n34\n41\n\n\n4\nD\n6\n13\n32\n\n\n\n\n\n\n\n\n3. add :Ave Col\n\ntwt=combine(twoway_table,:,[:Pl,:Ca,:Th]=&gt;((a,b,c)-&gt;mean([a,b,c]))=&gt;:Ave)\n\n4×5 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\nAve\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\nFloat64\n\n\n\n\n1\nA\n11\n26\n20\n19.0\n\n\n2\nB\n56\n83\n71\n70.0\n\n\n3\nC\n15\n34\n41\n30.0\n\n\n4\nD\n6\n13\n32\n17.0\n\n\n\n\n\n\n\n\n4. insert Ave Row\n\ninsert!(twt, 5 ,[\"Ave\",mean.(eachcol(twt)[2:end])...])\n\n5×5 DataFrame\n\n\n\nRow\nSubj\nPl\nCa\nTh\nAve\n\n\n\nCat…\nInt32?\nInt32?\nInt32?\nFloat64\n\n\n\n\n1\nA\n11\n26\n20\n19.0\n\n\n2\nB\n56\n83\n71\n70.0\n\n\n3\nC\n15\n34\n41\n30.0\n\n\n4\nD\n6\n13\n32\n17.0\n\n\n5\nAve\n22\n39\n41\n34.0"
   },
   {
-    "objectID": "posts/combine/index.html",
-    "href": "posts/combine/index.html",
-    "title": "DataFrame combine function",
+    "objectID": "posts/transformation/index.html",
+    "href": "posts/transformation/index.html",
+    "title": "dataset feature transformation",
     "section": "",
-    "text": "using DataFrames,PrettyTables\ndf=DataFrame(a=1:3, b=4:6)\n\n3×2 DataFrame\n\n\n\nRow\na\nb\n\n\n\nInt64\nInt64\n\n\n\n\n1\n1\n4\n\n\n2\n2\n5\n\n\n3\n3\n6\n\n\n\n\n\n\n\ncombine(df, :a =&gt; sum, nrow, renamecols=false)  \n\n1×2 DataFrame\n\n\n\nRow\na\nnrow\n\n\n\nInt64\nInt64\n\n\n\n\n1\n6\n3"
+    "text": "简介\n\n\n\nbotsonhousing-price-predicting\n对各feature做不同的变换\nfeature 参见 :Applied Multivariate Statistical Analysis | SpringerLink p51\n变换方法参见 : TableTransforms-Functional"
   },
   {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
-    "section": "",
-    "text": "This is a post with executable code."
+    "objectID": "posts/transformation/index.html#load-package",
+    "href": "posts/transformation/index.html#load-package",
+    "title": "dataset feature transformation",
+    "section": "1. load package",
+    "text": "1. load package\n\ninclude(\"../utils.jl\")   # import load_csv method\nusing  DataFrames,TableTransforms\nusing  Random\nRandom.seed!(34343)\n\nTaskLocalRNG()"
+  },
+  {
+    "objectID": "posts/transformation/index.html#load-data",
+    "href": "posts/transformation/index.html#load-data",
+    "title": "dataset feature transformation",
+    "section": "2. load data",
+    "text": "2. load data\n\ndf=load_csv(\"BostonHousing\")\nfirst(df,10)\n\n10×14 DataFrame\n\n\n\nRow\ncrim\nzn\nindus\nchas\nnox\nrm\nage\ndis\nrad\ntax\nptratio\nb\nlstat\nmedv\n\n\n\nFloat64\nFloat64\nFloat64\nInt64\nFloat64\nFloat64\nFloat64\nFloat64\nInt64\nInt64\nFloat64\nFloat64\nFloat64\nFloat64\n\n\n\n\n1\n0.00632\n18.0\n2.31\n0\n0.538\n6.575\n65.2\n4.09\n1\n296\n15.3\n396.9\n4.98\n24.0\n\n\n2\n0.02731\n0.0\n7.07\n0\n0.469\n6.421\n78.9\n4.9671\n2\n242\n17.8\n396.9\n9.14\n21.6\n\n\n3\n0.02729\n0.0\n7.07\n0\n0.469\n7.185\n61.1\n4.9671\n2\n242\n17.8\n392.83\n4.03\n34.7\n\n\n4\n0.03237\n0.0\n2.18\n0\n0.458\n6.998\n45.8\n6.0622\n3\n222\n18.7\n394.63\n2.94\n33.4\n\n\n5\n0.06905\n0.0\n2.18\n0\n0.458\n7.147\n54.2\n6.0622\n3\n222\n18.7\n396.9\n5.33\n36.2\n\n\n6\n0.02985\n0.0\n2.18\n0\n0.458\n6.43\n58.7\n6.0622\n3\n222\n18.7\n394.12\n5.21\n28.7\n\n\n7\n0.08829\n12.5\n7.87\n0\n0.524\n6.012\n66.6\n5.5605\n5\n311\n15.2\n395.6\n12.43\n22.9\n\n\n8\n0.14455\n12.5\n7.87\n0\n0.524\n6.172\n96.1\n5.9505\n5\n311\n15.2\n396.9\n19.15\n27.1\n\n\n9\n0.21124\n12.5\n7.87\n0\n0.524\n5.631\n100.0\n6.0821\n5\n311\n15.2\n386.63\n29.93\n16.5\n\n\n10\n0.17004\n12.5\n7.87\n0\n0.524\n6.004\n85.9\n6.5921\n5\n311\n15.2\n386.71\n17.1\n18.9"
+  },
+  {
+    "objectID": "posts/transformation/index.html#tranformation",
+    "href": "posts/transformation/index.html#tranformation",
+    "title": "dataset feature transformation",
+    "section": "3. tranformation",
+    "text": "3. tranformation\n\ntable=(eachcol(df))|&gt;Functional(\n                  1=&gt;log,\n                  2=&gt;x-&gt;x/10,\n                  3=&gt;log,\n                  4=&gt;x-&gt;x,\n                  5=&gt;log,\n                  6=&gt;log,\n                  7=&gt;x-&gt;(x^2.5)/10000,\n                  8=&gt;log,\n                  9=&gt;log,\n                  10=&gt;log,\n                  11=&gt;x-&gt;exp(0.4*x)/1000,\n                  12=&gt;x-&gt;x/100,\n                  13=&gt;x-&gt;sqrt(x),\n                  14=&gt;log\n)\nfirst(table,10)\n\n10×14 DataFrame\n\n\n\nRow\ncrim\nzn\nindus\nchas\nnox\nrm\nage\ndis\nrad\ntax\nptratio\nb\nlstat\nmedv\n\n\n\nFloat64\nFloat64\nFloat64\nInt64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\nFloat64\n\n\n\n\n1\n-5.06404\n1.8\n0.837248\n0\n-0.619897\n1.88327\n3.43257\n1.40854\n0.0\n5.69036\n0.454865\n3.969\n2.23159\n3.17805\n\n\n2\n-3.6005\n0.0\n1.95586\n0\n-0.757153\n1.85957\n5.52958\n1.60284\n0.693147\n5.48894\n1.23645\n3.969\n3.02324\n3.07269\n\n\n3\n-3.60123\n0.0\n1.95586\n0\n-0.757153\n1.972\n2.91812\n1.60284\n0.693147\n5.48894\n1.23645\n3.9283\n2.00749\n3.54674\n\n\n4\n-3.43052\n0.0\n0.779325\n0\n-0.780886\n1.94562\n1.41959\n1.80207\n1.09861\n5.40268\n1.77224\n3.9463\n1.71464\n3.50856\n\n\n5\n-2.67292\n0.0\n0.779325\n0\n-0.780886\n1.96669\n2.16271\n1.80207\n1.09861\n5.40268\n1.77224\n3.969\n2.30868\n3.58906\n\n\n6\n-3.51157\n0.0\n0.779325\n0\n-0.780886\n1.86097\n2.63995\n1.80207\n1.09861\n5.40268\n1.77224\n3.9412\n2.28254\n3.3569\n\n\n7\n-2.42713\n1.25\n2.06306\n0\n-0.646264\n1.79376\n3.61981\n1.71569\n1.60944\n5.73979\n0.437029\n3.956\n3.52562\n3.13114\n\n\n8\n-1.93413\n1.25\n2.06306\n0\n-0.646264\n1.82002\n9.05333\n1.78348\n1.60944\n5.73979\n0.437029\n3.969\n4.37607\n3.29953\n\n\n9\n-1.55476\n1.25\n2.06306\n0\n-0.646264\n1.72829\n10.0\n1.80535\n1.60944\n5.73979\n0.437029\n3.8663\n5.47083\n2.80336\n\n\n10\n-1.77172\n1.25\n2.06306\n0\n-0.646264\n1.79243\n6.83885\n1.88587\n1.60944\n5.73979\n0.437029\n3.8671\n4.13521\n2.93916"
   },
   {
     "objectID": "posts/contingencytable/index.html",
@@ -68,6 +82,20 @@
     "title": "using DataFrame construct cotingencytable",
     "section": "4. add :Total Row",
     "text": "4. add :Total Row\n\ninsert!(twt, 3 ,[\"Total\",sum.(eachcol(twt)[2:end])...])\n\n3×5 DataFrame\n\n\n\nRow\nGender\nChocolate\nStrawberry\nVanilla\nTotal\n\n\n\nString7\nInt64?\nInt64?\nInt64?\nInt64\n\n\n\n\n1\nFemale\n37\n17\n12\n66\n\n\n2\nMale\n21\n18\n32\n71\n\n\n3\nTotal\n58\n35\n44\n137\n\n\n\n\n\n\n\n5. read table\n建立表格后,就可以用来计算条件概率,按照dataframe的行列读取方式\n\n\n5.1 边缘概率\n统计参加试验的女性总人数\n\n \"参加实验的女性总人数\"=&gt;twt[1,:Total]\n\n\"参加实验的女性总人数\" =&gt; 66\n\n\n计算试验中喜欢巧克力口味冰激凌的总人数\n\n \"喜欢巧克力冰激凌总人数\"=&gt;twt[3,:Chocolate]\n\n\"喜欢巧克力冰激凌总人数\" =&gt; 58\n\n\n参加试验的总数\n\n\"参加试验的总数\"=&gt;twt[3,:Total]\n\n\"参加试验的总数\" =&gt; 137"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "posts/combine/index.html",
+    "href": "posts/combine/index.html",
+    "title": "DataFrame combine function",
+    "section": "",
+    "text": "using DataFrames,PrettyTables\ndf=DataFrame(a=1:3, b=4:6)\n\n3×2 DataFrame\n\n\n\nRow\na\nb\n\n\n\nInt64\nInt64\n\n\n\n\n1\n1\n4\n\n\n2\n2\n5\n\n\n3\n3\n6\n\n\n\n\n\n\n\ncombine(df, :a =&gt; sum, nrow, renamecols=false)  \n\n1×2 DataFrame\n\n\n\nRow\na\nnrow\n\n\n\nInt64\nInt64\n\n\n\n\n1\n6\n3"
   },
   {
     "objectID": "posts/welcome/index.html",
