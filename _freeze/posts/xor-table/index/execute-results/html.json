@@ -1,0 +1,11 @@
+{
+  "hash": "32562547cb7a0c45f2cba565ce0049e1",
+  "result": {
+    "markdown": "---\ntitle: \"DataFrame xor table\"\nauthor: \"math4mads\"\ndate: \"2023-09-14\"\ncategories: [dataframe, code,julia,anova]\nimage: \"xor-table.jpg\"\n---\n\n:::{.callout-note title=\"简介\"}\n利用[DataFrames.transform](https://dataframes.juliadata.org/stable/lib/functions/#DataFrames.transform) 方法生成 xor table\n\n[xor 方法:Base.xor](https://docs.julialang.org/en/v1/base/math/#Base.xor)\n\n```julia\ntransform!(df, [:A, :B] => ByRow(xor) => :AxorB)\n```\n:::\n\n::: {.cell execution_count=1}\n``` {.julia .cell-code}\nusing DataFrames,PrettyTables\nA=[0,0,1,1]\nB=[0,1,0,1]\ndf=DataFrame(A=A,B=B)\ntransform!(df, [:A, :B] => ByRow(xor) => :AxorB)\n@pt df\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n┌───────┬───────┬───────┐\n│     A │     B │ AxorB │\n│ Int64 │ Int64 │ Int64 │\n├───────┼───────┼───────┤\n│     0 │     0 │     0 │\n│     0 │     1 │     1 │\n│     1 │     0 │     1 │\n│     1 │     1 │     0 │\n└───────┴───────┴───────┘\n```\n:::\n:::\n\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

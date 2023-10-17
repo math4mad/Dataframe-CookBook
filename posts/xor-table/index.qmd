@@ -1,0 +1,26 @@
+---
+title: "DataFrame xor table"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia,anova]
+image: "xor-table.jpg"
+---
+
+:::{.callout-note title="简介"}
+利用[DataFrames.transform](https://dataframes.juliadata.org/stable/lib/functions/#DataFrames.transform) 方法生成 xor table
+
+[xor 方法:Base.xor](https://docs.julialang.org/en/v1/base/math/#Base.xor)
+
+```julia
+transform!(df, [:A, :B] => ByRow(xor) => :AxorB)
+```
+:::
+
+```{julia}
+using DataFrames,PrettyTables
+A=[0,0,1,1]
+B=[0,1,0,1]
+df=DataFrame(A=A,B=B)
+transform!(df, [:A, :B] => ByRow(xor) => :AxorB)
+@pt df
+```
