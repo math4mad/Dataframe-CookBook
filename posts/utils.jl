@@ -1,5 +1,6 @@
-using RData,DataFrames, CodecBzip2,Pipe,GLM,GLMakie,PrettyTables
+using RData,DataFrames, CodecBzip2,Pipe,GLM,GLMakie,PrettyTables,DataFramesMeta
 using Combinatorics,ColorSchemes,RCall,CSV
+using Random
 
 
 """
@@ -13,6 +14,19 @@ function load_csv(str::String)
         df = fetch(str)
         return df
 end
+
+"""
+    load_csv(str::String,drop=true)
+
+加载 CSV 文件, 参数: name  , 是否丢弃缺失值数据
+"""
+function load_csv(str::String,drop=true)
+    fetch(str) = str |> d -> CSV.File("../data/$str.csv") |> DataFrame 
+    #to_ScienceType(d)=coerce(d,:Condition=>Multiclass)
+    df =drop ? fetch(str)|> dropmissing : fetch(str)
+    return df
+end
+
 
 """
     load_rda(str::AbstractString)

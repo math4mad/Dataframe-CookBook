@@ -1,0 +1,521 @@
+---
+title: "Video Game Data Visualization"
+author: "math4mads"
+date: "2023-12-14"
+categories: [dataframe,visualization,julia]
+image: "image.jpg"
+---
+:::{.callout-note title="简介"}
+ref :[Video games sales analysis and visualization](https://www.kaggle.com/code/snanilim/video-games-sales-analysis-and-visualization/notebook#notebook-container)
+ 
+:::
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+Random.seed!(34343)
+```
+
+## 2. dataprocessing
+### 2.1 load data
+```{julia}
+raw_data=load_csv("vgsales",false)
+@info "size"=>size(raw_data)
+first(raw_data,10)
+```
+
+### 2.2  features to lowercase
+```{julia}
+#raw_features=names(raw_data)
+ data=@pipe  names(raw_data)|>lowercase.(_)|>rename(raw_data,_)
+ first(data,1)
+```
+### 2.3 describe dataframe
+```{julia}
+describe(data)
+```
+nmissing  that is great!
+
+### 2.4 data type 
+
+ Rank - Ranking of overall sales, integer
+
+ Name - The games name
+
+ Platform - Platform of the games release (i.e. PC,PS4, etc.), object
+
+ Year - Year of the game's release, float
+
+ Genre - Genre of the game ,object
+
+ Publisher - Publisher of the game, object
+
+ NA_Sales - Sales in North America (in millions), float
+
+ EU_Sales - Sales in Europe (in millions), float
+
+ JP_Sales - Sales in Japan (in millions), float
+
+ Other_Sales - Sales in the rest of the world (in millions), float
+
+ Global_Sales - Total worldwide sales, float
+
+
+
+## 3. data analysis
+
+### 3.1 What genre games have been made the most?
+
+that is to count every genre's game 
+```{julia}
+df3_1=@pipe groupby(data,:genre)|>combine(_,nrow)|>rename(_,:nrow=>:counts)|>sort(_,:counts;rev=true)
+```
+```{julia}
+function plot_df3_1(df::AbstractDataFrame)
+    rows,_=size(df)
+    featrues=names(df)
+    fig=Figure(resolution=(500,600))
+    ax=Axis(fig[1,1],title="counts of game by genre")
+    ax.yticks=(1:rows,df.genre)
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="counts"
+    ax.ylabel="genre"
+    GLMakie.barplot!(ax,1:rows,df.counts;color = df.counts, strokecolor = :black, strokewidth = 1,direction=:x)
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_df3_1(df3_1)
+```
+so  **Action** and **Sports**  made most
+
+### 3.2  Which year had the most game release?
+
+```{julia}
+df3_2=@pipe groupby(data,:year)|>combine(_,nrow)|>rename(_,:nrow=>:counts)|>sort(_,:counts;rev=true)
+```
+```{julia}
+function plot_df3_2(df::AbstractDataFrame,cat::String="year")
+    @assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(500,800))
+    ax=Axis(fig[1,1],title="count game by year")
+    ax.yticks=(1:rows,df[:,cat])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="counts"
+    ax.ylabel="$cat"
+    GLMakie.barplot!(ax,1:rows,df.counts;color = df.counts, strokecolor = :black, strokewidth = 1,direction=:x)
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+
+plot_df3_2(df3_2)
+```
+
+### 3.3 Top 5 years games release by genre
+
+```{julia}
+
+```
+
+### 3.4 Which year had the highest sales worldwide?
+```{julia}
+df3_4=@pipe groupby(data,:year)|>@combine(_,:global_sales=sum(:global_sales))|>sort(_,:year;rev=true)
+```
+```{julia}
+function plot_df3_4(df::AbstractDataFrame)
+    rows=nrow(df)
+    fig=Figure(resolution=(500,700))
+    ax=Axis(fig[1,1],title="video game global sales")
+    ax.yticks=(1:rows,df[:,"year"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="sales"
+    ax.ylabel="year"
+    GLMakie.barplot!(ax,1:rows,df.global_sales;color = df.global_sales, strokecolor = :black, strokewidth = 1,direction=:x)
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_df3_4(df3_4)
+```
+
+### 3.5  Which genre game has been released the most in a single year?
+
+```{julia}
+df3_5=let
+    df=@pipe groupby(data,[:year,:genre])|>combine(_,nrow=>:counts)|>groupby(_,:year)
+    res=mapreduce(x->(sort(x,:counts;rev=true)|>first|>copy),vcat, df)|>DataFrame
+end
+```
+```{julia}
+    function plot_df3_5(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(1000,900))
+    ax=Axis(fig[1,1],title="video game most release in single year")
+    ax.yticks=(1:rows,df[:,"year"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="release"
+    ax.ylabel="year"
+    GLMakie.barplot!(ax,1:rows,df.counts;color = df.counts, strokecolor = :black, strokewidth = 1,direction=:x
+    
+    )
+    for (idx, row) in enumerate(eachrow(df))
+        counts,year,genre=row.counts,row.year,row.genre
+        GLMakie.text!(ax,counts+2,idx; text="$genre-$year",align = (:left, :center),fontsize=8)
+    end
+    
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end    
+ plot_df3_5(df3_5)
+```
+### 3.6 Which genre game has sold the most in a single year?
+```{julia}
+df6=@pipe select(data,[:year,:genre,:global_sales])|>groupby(_,[:year,:genre])|>@combine(_ ,:sales= sum(:global_sales))|>groupby(_,:year)|>@combine(_,n1=first(:genre), n2=first(:sales))
+
+```
+
+### 3.7 Which genre game have the highest sale price globally?
+```{julia}
+df3_7=@pipe groupby(data,[:genre])|>@combine(_,:sales=sum(:global_sales))|>sort(_,:sales;rev=true)
+```
+```{julia}
+function plot_df3_7(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(800,500))
+    ax=Axis(fig[1,1],title="video game sales champion by genre")
+    ax.yticks=(1:rows,df[:,"genre"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="sales"
+    ax.ylabel="genre"
+    GLMakie.barplot!(ax,1:rows,df.sales;color = df.sales, strokecolor = :black, strokewidth = 1,direction=:x,
+    bar_labels=:y )
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_df3_7(df3_7)
+```
+
+### 3.8 Which platfrom have the highest sale price globally?
+```{julia}
+df3_8=@pipe groupby(data,["platform"])|>@combine(_,:sales=sum(:global_sales))|>sort(_,:sales;rev=true)
+```
+```{julia}
+
+
+function plot_df3_8(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(600,800))
+    ax=Axis(fig[1,1],title="video game sales by Platform")
+    ax.yticks=(1:rows,df[:,"platform"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="sales"
+    ax.ylabel="platform"
+    GLMakie.barplot!(ax,1:rows,df.sales;color = df.sales, strokecolor = :black, strokewidth = 1,direction=:x,
+    bar_labels=:y )
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+
+plot_df3_8(df3_8)
+
+```
+
+### 3.9 Which individual game have the highest sale price globally?
+```{julia}
+df3_9=@pipe sort(data,:global_sales;rev=true)|>select(_,["name","year","global_sales"])|>first(_,20)
+```
+```{julia}
+
+function plot_top20_game(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(800,800))
+    ax=Axis(fig[1,1],title="global sales top 20")
+    ax.yticks=(1:rows,df[:,"name"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="sales"
+    ax.ylabel="name"
+    GLMakie.barplot!(ax,1:rows,df.global_sales;color = df.global_sales, strokecolor = :black, strokewidth = 1,direction=:x)
+    for (idx, row) in enumerate(eachrow(df))
+        name,year,sales=row.name,row.year,row.global_sales
+        GLMakie.text!(ax,sales+2,idx; text="$year-$sales",align = (:left, :center),fontsize=8)
+    end
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_top20_game(df3_9)
+```
+
+### 3.10  Sales compearison by genre
+```{julia}
+df3_10=@pipe select(data,[:genre,:na_sales,:eu_sales,:jp_sales,:other_sales])|>groupby(_,:genre)|>@combine(_,$AsTable = (na_sales = sum(:na_sales), eu_sales = sum(:eu_sales),jp_sales=sum(:jp_sales),other_sales=sum(:other_sales)))
+```
+```{julia}
+function plot_df3_10_heatmap(df::AbstractDataFrame)
+    genre=df.genre
+    data=@pipe select(df,Not(:genre))
+    row,col=size(data)
+    ma=@pipe Matrix(data)|>round.(_,digits=1)
+    fig=Figure(resolution=(1000,400))
+    ax=Axis(fig[1,1],title="video game sales heatmap")
+    ax.yticks=(1:col,names(data))
+    ax.xticks=(1:row,genre)
+    heatmap!(ax,ma)
+    [GLMakie.text!(ax,i,j;text="$(ma[i,j])",align = (:center, :center),fontsize=12,color=:white) for i in 1:row,j in 1:col]
+
+    fig
+end
+plot_df3_10_heatmap(df3_10)
+```
+```{julia}
+res10=@pipe df3_10|>select(_,Not(:genre))|>Matrix|>permutedims|>reshape(_,(48,1))|>_[:,1]
+cats=@pipe df3_10|>select(_,Not(:genre))|>names
+type_name=df3_10.genre
+grp=repeat(1:4, 12)
+grp_x=repeat(1:12,inner=4)
+colors = cgrad(:tab10)
+function plot_df3_10_bardodge()
+    fig=Figure(resolution=(1000,600))
+    ax=Axis(fig[1,1],title="video game sales  barplot dodge",xticklabelrotation = pi/8)
+    ax.xticks=(1:12,type_name)
+    GLMakie.barplot!(ax,grp_x,res10; dodge =grp,color=colors[grp],strokecolor = :black, strokewidth = 1,bar_labels = :y,label_rotation=1/2*pi)
+    labels = ["$i" for i in cats]
+    elements = [PolyElement(polycolor = colors[i]) for (i,c) in enumerate(cats)]
+   Legend(fig[1,2], elements, labels, "sales region", orientation=:vertical, tellwidth = true, tellheight =false)
+    fig
+end
+plot_df3_10_bardodge()
+```
+
+### 3.11 Sales compearison by platform
+```{julia}
+df3_11=@pipe select(data,[:platform,:na_sales,:eu_sales,:jp_sales,:other_sales,:genre])|>groupby(_,:platform)|>@combine(_,$AsTable = (na_sales = sum(:na_sales), eu_sales = sum(:eu_sales),jp_sales=sum(:jp_sales),other_sales=sum(:other_sales)))
+```
+
+```{julia}
+let
+    res11 = @pipe df3_11 |> select(_, Not(:platform)) |> Matrix |> permutedims |> reshape(_, (124, 1)) |> _[:, 1]
+    cats = @pipe df3_11 |> select(_, Not(:platform)) |> names
+    type_name = df3_11.platform
+    grp = repeat(1:4, 31)
+    grp_x = repeat(1:31, inner=4)
+    colors = cgrad(:tab10)
+
+    function plot_platform_dodge()
+        fig = Figure(resolution=(1800, 600))
+        ax = Axis(fig[1, 1], title="video game sales by platform", xticklabelrotation=pi / 8)
+        ax.xticks = (1:31, type_name)
+        GLMakie.barplot!(ax, grp_x, res11; dodge=grp, color=colors[grp], strokecolor=:black, strokewidth=1, bar_labels=:y, label_rotation=1 / 2 * pi)
+        labels = ["$i" for i in cats]
+        elements = [PolyElement(polycolor=colors[i]) for (i, c) in enumerate(cats)]
+        Legend(fig[1, 2], elements, labels, "sales region", orientation=:vertical, tellwidth=true, tellheight=false)
+        fig
+    end
+
+   plot_platform_dodge()
+end
+```
+
+### 3.12 Top 20 Publisher
+
+```{julia}
+df3_12=@pipe groupby(data,[:publisher])|>combine(_,nrow)|>rename(_,:nrow=>:counts)|>sort(_,:counts;rev=true)|>first(_,20)
+```
+
+```{julia}
+function plot_top20_publisher(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(800,800))
+    ax=Axis(fig[1,1],title="global sales top 20")
+    ax.yticks=(1:rows,df[:,"publisher"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="counts"
+    ax.ylabel="publiser"
+    GLMakie.barplot!(ax,1:rows,df.counts;color = df.counts, strokecolor = :black, strokewidth = 1,direction=:x)
+    for (idx, row) in enumerate(eachrow(df))
+        publisher,counts=row.publisher,row.counts
+        GLMakie.text!(ax,counts+2,idx; text="$counts",align = (:left, :center),fontsize=8)
+    end
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_top20_publisher(df3_12)
+```
+
+### 3.13 Top global sales by publisher
+```{julia}
+df3_13=@pipe groupby(data,[:publisher])|>@combine(_,:sales=sum(:global_sales))|>sort(_,:sales;rev=true)|>first(_,20)
+```
+```{julia}
+function plot_df3_13(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(800,500))
+    ax=Axis(fig[1,1],title="video game sales by publisher",yreversed=true)
+    ax.yticks=(1:rows,df[:,"publisher"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="sales"
+    ax.ylabel="pubhisher"
+    GLMakie.barplot!(ax,1:rows,df.sales;color = df.sales, strokecolor = :black, strokewidth = 1,direction=:x)
+    for (idx, row) in enumerate(eachrow(df))
+        sales=round(row.sales,digits=2)
+        GLMakie.text!(ax,sales+2,idx; text="$(sales)",align = (:left, :center),fontsize=8)
+    end
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_df3_13(df3_13)
+```
+
+### 3.14 publisher comperison
+
+```{julia}
+features=["publisher", "na_sales", "eu_sales", "jp_sales", "other_sales","global_sales"]
+df3_14=@pipe select(data,features)|>groupby(_,:publisher)|>
+@combine(_,$AsTable = (na_sales = sum(:na_sales), eu_sales = sum(:eu_sales),jp_sales=sum(:jp_sales),other_sales=sum(:other_sales)),global_sales=sum(:global_sales))|>sort(_,:global_sales;rev=true)|>first(_,15)
+```
+```{julia}
+res14 = @pipe df3_14 |> select(_, Not(:publisher,:global_sales)) |> Matrix |> permutedims|> reshape(_, (60, 1)) |> _[:, 1]|>round.(_,digits=2)
+cats = @pipe df3_14 |> select(_, Not(:publisher,:global_sales)) |> names
+type_name = df3_14.publisher
+grp = repeat(1:4, 15)
+grp_x = repeat(1:15, inner=4)
+colors = cgrad(:tab10)
+function plot_df3_14_bardodge()
+    fig=Figure(resolution=(1200,600))
+    ax=Axis(fig[1,1],title="video game sales  by publisher",xticklabelrotation = pi/6)
+    ax.xticks=(1:15,type_name)
+    GLMakie.barplot!(ax,grp_x,res14; dodge =grp,color=colors[grp],strokecolor = :black, strokewidth = 1,bar_labels = :y,label_rotation=1/2*pi)
+    labels = ["$i" for i in cats]
+    elements = [PolyElement(polycolor = colors[i]) for (i,c) in enumerate(cats)]
+   Legend(fig[1,2], elements, labels, "sales region", orientation=:vertical, tellwidth = true, tellheight =false)
+    fig
+end
+plot_df3_14_bardodge()
+```
+
+### 3.15 Top publisher by Count each year
+```{julia}
+df15=@pipe select(data,[:year,:publisher])|>groupby(_,[:year,:publisher])|>combine(_,nrow)|>groupby(_,:year)
+df3_15=DataFrame()
+for (idx,df) in enumerate(df15)
+    local d=@pipe sort(df,:nrow;rev=true)|>first
+    push!(df3_15,d)
+end
+sort!(df3_15,:nrow;rev=true)
+```
+
+```{julia}
+function plot_df3_15(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(800,800))
+    ax=Axis(fig[1,1],title="publiher champion by year")
+    ax.yticks=(1:rows,df[:,"year"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="counts"
+    ax.ylabel="name"
+    GLMakie.barplot!(ax,1:rows,df.nrow;color = df.nrow, strokecolor = :black, strokewidth = 1,direction=:x)
+    for (idx, row) in enumerate(eachrow(df))
+        publisher,nrow,year=row.publisher,row.nrow,row.year
+        GLMakie.text!(ax,nrow+2,idx; text="$publisher-$nrow",align = (:left, :center),fontsize=8)
+    end
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_df3_15(df3_15)
+```
+
+### 3.16 Total revenue by region
+```{julia}
+df3_16=@pipe select(data,["na_sales", "eu_sales", "jp_sales", "other_sales"])|>@combine(_, :sales=sum.(eachcol(_)))
+df3_16.region=["na_sales", "eu_sales", "jp_sales", "other_sales"]
+df3_16
+```
+```{julia}
+function plot_sales_by_region(df::AbstractDataFrame)
+    #@assert names(df)[2]=="counts"
+    rows=nrow(df)
+    fig=Figure(resolution=(500,500))
+    ax=Axis(fig[1,1],title="video game sales by region")
+    ax.xticks=(1:rows,df[:,"region"])
+    #ax.xticklabelrotation = pi/2
+    ax.xlabel="region"
+    ax.ylabel="salse"
+    GLMakie.barplot!(ax,1:rows,df.sales;color = df.sales, strokecolor = :black, strokewidth = 1,bar_labels = :y)
+    # for (idx, row) in enumerate(eachrow(df))
+    #     sales=round(row.sales,digits=2)
+    #     GLMakie.text!(ax,idx,sales+100,; text="$(sales)",align = (:center, :center),fontsize=12)
+    # end
+    GLMakie.hidedecorations!(ax,label = false, ticklabels = false, ticks = false)
+    fig
+end
+plot_sales_by_region(df3_16)
+```
+
+```{julia}
+function plot_sales_by_region_pie(df::AbstractDataFrame)
+    
+    colors = [:yellow,:red, :purple, :green]
+    fig=Figure(resolution=(500,500))
+    ax=Axis(fig[1,1];title="video game sales by region",autolimitaspect = 1)
+    GLMakie.pie!(ax, df.sales;color=colors,radius=4,inner_radius = 2,
+    strokecolor = :white,
+    strokewidth = 5)
+    labels = ["$i" for i in df.region]
+    elements = [PolyElement(polycolor = colors[i]) for (i,c) in enumerate(df.region)]
+    Legend(fig[1,2], elements, labels, "sales region", orientation=:vertical, tellwidth = true, tellheight =false)
+    GLMakie.hidedecorations!(ax,label = false)
+    fig
+end
+plot_sales_by_region_pie(df3_16)
+```
+
+
+### 3.17  Sales Histogram
+```{julia}
+f=log # transfromer  function 
+
+df3_18=@pipe select(data,[:na_sales,:eu_sales,:jp_sales,:other_sales,:global_sales])
+# log_df3_18=@pipe @transform(df3_18,:na_sales=f.(:na_sales),:eu_sales=f.(:eu_sales),:jp_sales=f.(:jp_sales),
+#  :other_sales=f.(:other_sales),:global_sales=f.(:global_sales)
+# )|>select(_,[:na_sales,:eu_sales,:jp_sales,:other_sales,:global_sales])
+```
+
+```{julia}
+function plot_sales_hist(df::AbstractDataFrame)
+    cats=names(df)
+    fig=Figure(resolution=(600,600))
+    for (idx, col) in enumerate(eachcol(df))
+        local ax=Axis(fig[fldmod1(idx,2)...],title=cats[idx])
+        data=@pipe filter(x->x!=0,col)|>f.(_)
+        GLMakie.hist!(ax,data, color = :blue, strokewidth = 1, strokecolor = :black,label=cats[idx],normalization =:pdf)
+        density!(ax, data; color = (:green, 0.4), label = "density", strokewidth = 2,strokecolor=:red,npoints = 15)
+        
+    end
+    
+    fig
+end
+plot_sales_hist(df3_18)
+
+```
+
+## The End
+
+That is a  exercises about julia dataframe opreation methods
+
+
+
+
+
+
+
+
+
+
+
+
+

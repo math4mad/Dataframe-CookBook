@@ -2,7 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/videogame-analysis/index.html",
       "/posts/post-with-code/index.html",
+      "/posts/dataframes-meta.html",
       "/posts/xor-table/index.html",
       "/posts/contingencytable/index.html",
       "/posts/combine/index.html",

@@ -1,0 +1,63 @@
+---
+title: "DataFrameMeta"
+author: "math4mads"
+date: "2023-09-14"
+categories: [dataframe, code,julia]
+---
+
+
+## 1. load package
+```{julia}
+using DataFrames,DataFramesMeta,PrettyTables,StatsBase
+df = DataFrame(x = [1, 1, 2, 2], y = [1, 2, 101, 102]);
+@pt df
+gd = groupby(df, :x);
+```
+
+## 2. Marcos
+### 2.1 `@select`,`@select!`
+```{julia}
+@pt @select(df, :x, :y)
+```
+
+```{julia}
+@pt @select(df, :x2 = 2 * :x, :y)
+```
+
+### 2.2 `@transform` and `@transform!`
+```{julia}
+@pt @transform(df, :x2 = 2 * :x, :y)
+```
+
+### 2.3 `@subset` and `@subset!`
+```{julia}
+@pt @subset(df, :x .> 1)
+```
+
+```{julia}
+ let 
+   outside_var = 1;
+   @pt @subset(df, :x .> outside_var, :y .< 102)
+ end
+```
+
+```{julia}
+@pt @subset(gd, :x .> mean(:x))
+```
+
+### 2.4 `combine`
+```{julia}
+ @pt @combine(gd, :x2 = sum(:y))
+```
+
+### 2.5 `orderby`
+```{julia}
+ @pt @orderby(df, :x)
+```
+
+```{julia}
+ @pt @orderby(df, -1. * :x)
+```
+
+
+

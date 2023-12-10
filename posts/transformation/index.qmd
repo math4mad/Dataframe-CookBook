@@ -48,6 +48,8 @@ table=(eachcol(df))|>Functional(
                   13=>x->sqrt(x),
                   14=>log
 )
+
 first(table,10)
 ```
+
 
