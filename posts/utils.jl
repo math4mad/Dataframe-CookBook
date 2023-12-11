@@ -1,6 +1,7 @@
-using RData,DataFrames, CodecBzip2,Pipe,GLM,GLMakie,PrettyTables,DataFramesMeta
+using RData,DataFrames, CodecBzip2,Pipe,GLM,GLMakie,PrettyTables
 using Combinatorics,ColorSchemes,RCall,CSV
 using Random
+using Tidier
 
 
 """
