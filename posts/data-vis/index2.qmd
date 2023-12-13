@@ -1,0 +1,178 @@
+---
+title: "2018-19 English Premier League: Machine Learning"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "soccer2018-19.jpeg"
+---
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv("soccer-2018-19",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+## 3. peek data
+```{julia}
+@chain df begin
+ @slice(1:5)
+end
+```
+
+## 4. relationship of taken shots and goal in each matches
+### 4.1  home matches
+```{julia}
+arsenal_home_df=@chain df begin
+   @filter(hometeam=="Arsenal")
+   @select(hs,fthg)
+end
+
+arsenal_guest_df=@chain df begin
+   @filter(awayteam=="Arsenal")
+   @select(hs,fthg)
+end
+```
+```{julia}
+function plot_hs_fthg_cor(df::AbstractDataFrame)
+    set_aog_theme!()
+    axis = (width = 300, height = 300)
+    hs_fthg= data(df) * mapping(:hs,:fthg)
+    plt = hs_fthg * (linear() + mapping(color=:fthg))
+    draw(plt; axis = axis)
+end
+plot_hs_fthg_cor(arsenal_home_df)
+```
+
+主场射门次数和进球数的相关性检验
+```{julia}
+CorrelationTest(eachcol(arsenal_home_df)...)
+```
+
+
+### 4.2 guest matches
+```{julia}
+plot_hs_fthg_cor(arsenal_guest_df)
+```
+客场射门次数和进球数的相关性检验
+```{julia}
+CorrelationTest(eachcol(arsenal_guest_df)...)
+```
+
+## 5.How many times did Arsenal win first half and win either full game?
+
+```{julia}
+half_full_relationship=@chain df begin 
+  @filter(hometeam=="Arsenal"||awayteam=="Arsenal")
+  
+end
+```
+在主场上半场领先并且全场获胜的比赛数
+```{julia}
+h_a_home=@chain half_full_relationship begin
+   @filter(hometeam=="Arsenal")
+   @filter(htr=="H"&&ftr=="H")
+   @summarize(n=nrow())
+end
+```
+在客场上半场领先并且全场获胜的比赛数
+```{julia}
+h_a_away=@chain half_full_relationship begin
+   @filter(awayteam=="Arsenal")
+   @filter(htr=="A"&&ftr=="A")
+   @summarize(n=nrow())
+end
+```
+在主场上半场落后,最终获得全场比赛数
+
+```{julia}
+question3=@chain half_full_relationship begin
+   @filter(hometeam=="Arsenal")
+   @filter(htr=="H"&&ftr=="A")
+   @summarize(n=nrow())
+end
+```
+
+## 6 每个裁判出示的红牌和黄牌数量
+```{julia}
+df6=@chain df begin
+  @group_by(referee)
+  @summarize(yellow_card=sum(hy)+sum(ay),red_card=sum(hr)+sum(ar))
+  @ungroup
+end
+```
+```{julia}
+let 
+    row,col=size(df6)
+    cats = @pipe df6 |> select(_, Not(:referee)) |> names
+    res6 = @pipe df6 |> select(_, Not(:referee)) |> Matrix |> permutedims |> reshape(_, (36, 1)) |> _[:, 1]
+    referee_name = df6.referee
+    grp = repeat(1:col-1, row)
+    grp_x = repeat(1:row, inner=col-1)
+    colors = [:lightyellow,:red]
+
+    function plot_platform_dodge()
+        fig = Figure(resolution=(1200, 600))
+        ax = Axis(fig[1, 1], title="yellow card and red card  by referee", xticklabelrotation=pi /8)
+        ax.xticks = (1:row, referee_name)
+        barplot!(ax, grp_x, res6; dodge=grp, color=colors[grp], strokecolor=:black, strokewidth=1, bar_labels=:y, label_rotation=1 / 2 * pi)
+        labels = ["$i" for i in cats]
+        elements = [PolyElement(polycolor=colors[i]) for (i, c) in enumerate(cats)]
+        Legend(fig[1, 2], elements, labels, "cards", orientation=:vertical, tellwidth=true, tellheight=false)
+        fig
+    end
+
+   plot_platform_dodge()
+end
+```
+
+
+## 7. 哪只球队攻破阿森纳球门最多
+
+客队在 Emirates Stadium 的进球数统计
+```{julia}
+guest_goals=@chain df begin 
+  @filter(hometeam=="Arsenal")
+  @group_by(awayteam)
+  @summarize(guest_goals=sum(ftag))
+end
+```
+```{julia}
+function plot_bar(df::AbstractDataFrame)
+  row, col=size(df)
+  cats=df.awayteam
+  fig=Figure(resolution=(800,300))
+  ax=Axis(fig[1,1]; xticklabelrotation=pi /8)
+  ax.xlabel="guestteam"
+  ax.ylabel="goal"
+  ax.xticks=(1:row,cats)
+  barplot!(ax,1:row,df.guest_goals)
+  fig
+end
+plot_bar(guest_goals)
+```
+
+其他球队主场对阵Arsenal 时的进球数
+
+```{julia}
+home_goals_vs_arsenal=@chain df begin 
+    @filter(awayteam=="Arsenal")
+    @group_by(hometeam)
+    @summarize(home_goals=sum(fthg))
+end
+function plot_bar2(df::AbstractDataFrame)
+  row, col=size(df)
+  cats=df.hometeam
+  fig=Figure(resolution=(800,300))
+  ax=Axis(fig[1,1]; xticklabelrotation=pi /8)
+  ax.xlabel="hometeam"
+  ax.ylabel="goals"
+  ax.xticks=(1:row,cats)
+  barplot!(ax,1:row,df.home_goals)
+  fig
+end
+plot_bar2(home_goals_vs_arsenal)
+```

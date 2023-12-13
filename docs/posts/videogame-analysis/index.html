@@ -109,7 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -179,7 +179,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-package" id="toc-load-package" class="nav-link active" data-scroll-target="#load-package">1. load package</a></li>
+  <li><a href="#dataprocessing" id="toc-dataprocessing" class="nav-link" data-scroll-target="#dataprocessing">2. dataprocessing</a>
+  <ul class="collapse">
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data">2.1 load data</a></li>
+  <li><a href="#features-to-lowercase" id="toc-features-to-lowercase" class="nav-link" data-scroll-target="#features-to-lowercase">2.2 features to lowercase</a></li>
+  <li><a href="#describe-dataframe" id="toc-describe-dataframe" class="nav-link" data-scroll-target="#describe-dataframe">2.3 describe dataframe</a></li>
+  <li><a href="#data-type" id="toc-data-type" class="nav-link" data-scroll-target="#data-type">2.4 data type</a></li>
+  </ul></li>
+  <li><a href="#data-analysis" id="toc-data-analysis" class="nav-link" data-scroll-target="#data-analysis">3. data analysis</a>
+  <ul class="collapse">
+  <li><a href="#what-genre-games-have-been-made-the-most" id="toc-what-genre-games-have-been-made-the-most" class="nav-link" data-scroll-target="#what-genre-games-have-been-made-the-most">3.1 What genre games have been made the most?</a></li>
+  <li><a href="#which-year-had-the-most-game-release" id="toc-which-year-had-the-most-game-release" class="nav-link" data-scroll-target="#which-year-had-the-most-game-release">3.2 Which year had the most game release?</a></li>
+  <li><a href="#top-5-years-games-release-by-genre" id="toc-top-5-years-games-release-by-genre" class="nav-link" data-scroll-target="#top-5-years-games-release-by-genre">3.3 Top 5 years games release by genre</a></li>
+  <li><a href="#which-year-had-the-highest-sales-worldwide" id="toc-which-year-had-the-highest-sales-worldwide" class="nav-link" data-scroll-target="#which-year-had-the-highest-sales-worldwide">3.4 Which year had the highest sales worldwide?</a></li>
+  <li><a href="#which-genre-game-has-been-released-the-most-in-a-single-year" id="toc-which-genre-game-has-been-released-the-most-in-a-single-year" class="nav-link" data-scroll-target="#which-genre-game-has-been-released-the-most-in-a-single-year">3.5 Which genre game has been released the most in a single year?</a></li>
+  <li><a href="#which-genre-game-has-sold-the-most-in-a-single-year" id="toc-which-genre-game-has-sold-the-most-in-a-single-year" class="nav-link" data-scroll-target="#which-genre-game-has-sold-the-most-in-a-single-year">3.6 Which genre game has sold the most in a single year?</a></li>
+  <li><a href="#which-genre-game-have-the-highest-sale-price-globally" id="toc-which-genre-game-have-the-highest-sale-price-globally" class="nav-link" data-scroll-target="#which-genre-game-have-the-highest-sale-price-globally">3.7 Which genre game have the highest sale price globally?</a></li>
+  <li><a href="#which-platfrom-have-the-highest-sale-price-globally" id="toc-which-platfrom-have-the-highest-sale-price-globally" class="nav-link" data-scroll-target="#which-platfrom-have-the-highest-sale-price-globally">3.8 Which platfrom have the highest sale price globally?</a></li>
+  <li><a href="#which-individual-game-have-the-highest-sale-price-globally" id="toc-which-individual-game-have-the-highest-sale-price-globally" class="nav-link" data-scroll-target="#which-individual-game-have-the-highest-sale-price-globally">3.9 Which individual game have the highest sale price globally?</a></li>
+  <li><a href="#sales-compearison-by-genre" id="toc-sales-compearison-by-genre" class="nav-link" data-scroll-target="#sales-compearison-by-genre">3.10 Sales compearison by genre</a></li>
+  <li><a href="#sales-compearison-by-platform" id="toc-sales-compearison-by-platform" class="nav-link" data-scroll-target="#sales-compearison-by-platform">3.11 Sales compearison by platform</a></li>
+  <li><a href="#top-20-publisher" id="toc-top-20-publisher" class="nav-link" data-scroll-target="#top-20-publisher">3.12 Top 20 Publisher</a></li>
+  <li><a href="#top-global-sales-by-publisher" id="toc-top-global-sales-by-publisher" class="nav-link" data-scroll-target="#top-global-sales-by-publisher">3.13 Top global sales by publisher</a></li>
+  <li><a href="#publisher-comperison" id="toc-publisher-comperison" class="nav-link" data-scroll-target="#publisher-comperison">3.14 publisher comperison</a></li>
+  <li><a href="#top-publisher-by-count-each-year" id="toc-top-publisher-by-count-each-year" class="nav-link" data-scroll-target="#top-publisher-by-count-each-year">3.15 Top publisher by Count each year</a></li>
+  <li><a href="#total-revenue-by-region" id="toc-total-revenue-by-region" class="nav-link" data-scroll-target="#total-revenue-by-region">3.16 Total revenue by region</a></li>
+  <li><a href="#sales-histogram" id="toc-sales-histogram" class="nav-link" data-scroll-target="#sales-histogram">3.17 Sales Histogram</a></li>
+  </ul></li>
+  <li><a href="#the-end" id="toc-the-end" class="nav-link" data-scroll-target="#the-end">The End</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 

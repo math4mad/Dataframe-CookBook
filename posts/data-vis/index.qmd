@@ -1,0 +1,183 @@
+---
+title: "2018-19 English Premier League: An Exploratory Data Analysis"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia]
+image: "soccer2018-19.jpeg"
+---
+
+:::{.callout-note title="简介"}
+ ref: [2018-19 English Premier League: An Exploratory Data Analysis](https://app.datacamp.com/workspace/w/866af1a5-490f-482d-bc8a-24af83118eb9#2018-19-english-premier-league-an-exploratory-data-analysis)
+
+ [Data Dictionary](https://app.datacamp.com/workspace/w/866af1a5-490f-482d-bc8a-24af83118eb9#data-dictionary)
+:::
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv("soccer-2018-19",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+## 3. peek data
+```{julia}
+@chain df begin
+ @slice(1:5)
+end
+```
+
+## 4. info of dataframe
+```{julia}
+df_info=describe(df,:nmissing, :eltype)
+```
+```{julia}
+ sum(df_info.nmissing)
+```
+
+
+## 5. collect  all team name
+```{julia}
+teams=df.hometeam|>levels
+
+```
+
+## 6. find  how many matches every team  play
+```{julia}
+df6=@chain df begin
+ @group_by  hometeam
+ @summarize   play_in_home=nrow()
+end
+```
+
+## 7. plot  feature's outliers
+```{julia}
+df7=@chain df begin
+    @select(5,6,hs:ar)
+end
+```
+```{julia}
+function plot_features_boxplot(df::AbstractDataFrame)
+  row,col=size(df)
+  features=names(df)
+  fig=Figure(resolution=(1000,500))
+  ax=Axis(fig[1,1],title="boxplot of features")
+  ax.xlabel="feature";ax.ylabel="counts"
+  ax.xticks=(1:col,features)
+  for (idx,col)  in enumerate(collect(eachcol(df)))
+    boxplot!(ax,fill(idx,row),col)
+  end
+  
+  fig
+end
+plot_features_boxplot(df7)
+```
+
+
+## 8. plot feature hist 
+```{julia}
+function plot_feature_hist(df::AbstractDataFrame,feature::Union{String,Symbol})
+  row,col,features=nrow(df),ncol(df),names(df)
+  @assert  feature in  features||Symbol.(features)
+  local fig=Figure(resolution=(500,500))
+  ax=Axis(fig[1,1],title="hist of feature:$(feature)")
+  ax.xlabel="bin";ax.ylabel="frequency"
+  hist!(df[:,feature];strokewidth = 1, strokecolor = :black)
+  fig
+end
+
+plot_feature_hist(df7,"fthg")
+```
+```{julia}
+plot_feature_hist(df7,"ftag")
+```
+
+## 9. compare all teams mean of certain feature
+```{julia}
+
+df_fthg_mean=@chain df begin
+   @group_by hometeam
+   @summarise fthg_mean=mean(fthg)
+end
+```
+```{julia}
+# function plot_team_avg(df::AbstractDataFrame)
+# end
+#@eval(Main, cat=:fthg)
+df_mean=@chain df begin
+   @group_by hometeam
+   @summarise cat_mean=mean(fthg)
+end
+row,col=size(df_mean)
+let 
+  fig=Figure(resolution=(1000,400))
+  ax=Axis(fig[1,1];title="barplot of fthg",xticklabelrotation = pi/8)
+#   ax.xlabel="team";ax.ylabel=String(feature)
+  ax.xticks=(1:row,df_mean.hometeam)
+  barplot!(ax,df_mean.cat_mean;strokewidth = 1, strokecolor = :black)
+  fig
+end
+```
+
+## 10. find  seasonality  patterns
+
+```{julia}
+  # using Dates
+  # @chain df begin
+  # @mutate(date=DateTime(split(date,"/")...))
+  # end
+```
+
+## 11. explore relationship of two variables
+
+```{julia}
+function plot_pair_relation(data::AbstractDataFrame,pair::Vector{Symbol})
+  fig=Figure()
+  ax=Axis(fig[1,1])
+  ax.title="$(Symbol.(pair))-relathioship"
+  scatter!(ax,data[:,pair[1]],data[:,pair[2]];markersize=12,color=(:lightgreen,0.2),strokecolor = :black, strokewidth =2)
+  fig
+  
+end
+
+plot_pair_relation(df,[:hf,:hy])
+```
+
+## 12. explore  variables  coorelation
+```{julia}
+cor_df=@chain df begin
+   @select(fthg,ftag,hst,hs,as,hc,ac)
+end
+```
+```{julia}
+function plot_coor_mat(df::AbstractDataFrame)
+ cor_mat=cor(Matrix(df))
+ m,n=size(cor_mat)
+ ticks=names(df)
+ fig=Figure()
+ ax=Axis(fig[1,1];yreversed=true)
+ ax.xticks = (1:m, ticks)
+ ax.yticks = (1:m, ticks)
+ hm=heatmap!(ax,cor_mat;colormap = :plasma)
+ for i in 1:m, j in 1:n
+    txtcolor = cor_mat[i, j] < 0.15 ? :white : :black
+    text!(ax, "$(round(cor_mat[i,j], digits = 2))", position = (i, j),
+        color = txtcolor, align = (:center, :center))
+end
+ Colorbar(fig[1, 2], hm; label = "values", width = 15)
+ fig
+end
+plot_coor_mat(cor_df)
+
+```
+
+
+
+
+
+
+
+
+

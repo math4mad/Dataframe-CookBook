@@ -1,9 +1,10 @@
-using RData,DataFrames, CodecBzip2,Pipe,GLM,GLMakie,PrettyTables
+using RData,DataFrames, CodecBzip2,Pipe,GLM,CairoMakie,PrettyTables
 using Combinatorics,ColorSchemes,RCall,CSV
 using Random
 using Tidier
-
-
+using AlgebraOfGraphics
+using StatsBase
+using  HypothesisTests
 """
     load_csv(str::String)
     读取 csv|>df|>dropmissing
