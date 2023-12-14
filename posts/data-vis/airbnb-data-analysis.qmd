@@ -1,0 +1,142 @@
+---
+title: "Airbnb List  Data Analysis"
+author: "math4mads"
+date: "2023-12-14"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "airbnb.png"
+---
+
+:::{.callout-note title="info"}
+- ref1 : [Airbnb Analysis, Visualization and Prediction](https://www.kaggle.com/code/chirag9073/airbnb-analysis-visualization-and-prediction/input)
+
+- ref2  :[[Data Analyst Pet Project - Python] Airbnb Listings for 6 Cities](https://app.datacamp.com/workspace/w/c65cc3d0-51a0-4794-9e54-05438ad59409#data-analyst-pet-project---python-airbnb-listings-for-6-cities)
+
+- dataset: [Airbnb Analysis, Visualization and Prediction](https://www.kaggle.com/code/chirag9073/airbnb-analysis-visualization-and-prediction/input)
+
+:::
+
+## 1. load package
+```{julia}
+include("../utils.jl");   # import load_csv method
+```
+
+## 2. load data
+```{julia}
+df =load_csv("airbnb_nyc_2019",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+## 3. peek data
+```{julia}
+@chain df begin
+  @slice(1:5)
+end
+```
+
+## 4. describe data
+```{julia}
+ @pipe describe(df)|>select(_,[:variable,:nmissing,:eltype])
+```
+
+## 5. shape of dataset
+```{julia}
+  size(df)
+```
+
+## 6. unselect some features
+```{julia}
+ select!(df,Not(["name","id","host_name","last_review"]));
+ 
+```
+
+## 7. replace missing of month review to zero
+```{julia}
+df=@chain df begin
+@mutate(reviews_per_month = case_when(  ismissing(reviews_per_month)  =>  0,
+                        true          => reviews_per_month))
+end
+```
+
+
+## 8. Data Visualization
+### 8.1 neighbourhood_group
+
+```{julia}
+neighbourhood_group_df=@chain df begin
+ @group_by(neighbourhood_group)
+ @summarize(count=nrow())
+ @ungroup
+end
+```
+```{julia}
+function plot_ngd_barplot(df)
+set_aog_theme!()
+plt = data(df) * mapping(:neighbourhood_group, :count;color = :neighbourhood_group)
+draw(plt * visual(BarPlot))
+end
+plot_ngd_barplot(neighbourhood_group_df)
+```
+### 8.2  in progressing....
+
+### 8.3  room type
+```{julia}
+roomtype_df=@chain df begin
+ @group_by(room_type)
+ @summarize(count=nrow())
+ @ungroup
+end
+```
+```{julia}
+function plot_roomtype_barplot(df)
+set_aog_theme!()
+plt = data(df) * mapping(:room_type, :count;color = :room_type)
+draw(plt * visual(BarPlot))
+end
+plot_roomtype_barplot(roomtype_df)
+```
+
+
+### 8.4  neighbourhood_group  and  room availablity relation
+```{julia}
+let
+ set_aog_theme!()
+ plt = data(df) * mapping(:neighbourhood_group, :availability_365;color = :neighbourhood_group)
+ draw(plt * visual(BoxPlot))
+
+end
+```
+
+### 8.5 Map of Neighbourhood group
+```{julia}
+let
+ set_aog_theme!()
+ plt = data(df[1:5:end,:]) * mapping(:longitude,:latitude;color = :neighbourhood_group)
+ draw(plt * visual(Scatter))
+
+end
+```
+
+### 8.6 Map of Neighbourhood
+```{julia}
+let
+ set_aog_theme!()
+ plt = data(df[1:5:end,:]) * mapping(:longitude,:latitude;color = :neighbourhood)
+ draw(plt * visual(Scatter))
+
+end
+```
+
+### 8.7 Map of room_type
+```{julia}
+let
+ set_aog_theme!()
+ plt = data(df[1:5:end,:]) * mapping(:longitude,:latitude;color = :room_type)
+ draw(plt * visual(Scatter))
+
+end
+```
+
+
+
+
+
