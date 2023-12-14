@@ -1,4 +1,5 @@
 using RData,DataFrames, CodecBzip2,Pipe,GLM,CairoMakie,PrettyTables
+using Makie
 using Combinatorics,ColorSchemes,RCall,CSV
 using Random
 using Tidier

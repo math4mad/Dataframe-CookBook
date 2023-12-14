@@ -1,0 +1,143 @@
+---
+title: "E-Commerce  Data Analysis"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "e-commerce.jpeg"
+---
+
+## 1. load package
+```{julia}
+include("../utils.jl");   # import load_csv method
+```
+
+## 2. load data
+```{julia}
+df =load_csv("online_retail",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+## 3. peek data
+```{julia}
+    @chain df begin
+    @slice(1:5)
+end
+```
+## 4. describe  of data 
+```{julia}
+@pipe describe(df)|>select(_,[:variable,:nmissing])
+```
+
+## 5. data analysis 
+### 5.1  which goods has most returning rate ?
+```{julia}
+return_data=@chain df begin
+   @filter(quantity<0)
+   @group_by(stockcode,description)
+   @summarize(sum_quantity=sum(quantity))
+   @ungroup
+   @arrange(sum_quantity)
+end
+```
+
+
+### 5.2 create plot of vis profit earned in UK  by customers weekly, monthly and quarterly
+
+```{julia}
+using Dates
+
+"""
+https://www.juliasos.com/syntax/julian-date-string-to-datetime/
+"""
+function julian_to_datetime(julian_date::AbstractString)
+    date_format = DateFormat("yyyy-mm-dd HH:MM:SS")
+    return DateTime(julian_date, date_format)
+end
+ df5_2=@chain df begin
+     @select(quantity,unitprice,invoicedate,country)
+     @filter(country=="United Kingdom",quantity>0)
+     @mutate(invoicedate= julian_to_datetime(invoicedate))
+     @mutate(year=year(invoicedate),month=month(invoicedate),week=week(invoicedate),quarter=quarterofyear(invoicedate))
+ end
+```
+
+#### 5.2.1  weekly  data
+```{julia}
+weekly_sales=@chain df5_2 begin
+ @group_by(week)
+ @mutate(earn_weekly=unitprice*quantity)
+ @summarise(sum_weekly=sum(earn_weekly))
+ @mutate(log_sum_weekly=log(sum_weekly))
+ @ungroup
+ @arrange(week)
+end
+```
+
+#### 5.2.2  monthly  data
+```{julia}
+monthly_sales=@chain df5_2 begin
+ @group_by(month)
+ @mutate(earn_monthly=unitprice*quantity)
+ @summarise(sum_monthly=sum(earn_monthly))
+ @mutate(log_sum_monthly=log(sum_monthly))
+ @ungroup
+ @arrange(month)
+end
+```
+
+#### 5.2.3  quarter data
+```{julia}
+quarter_sales=@chain df5_2 begin
+ @group_by(quarter)
+ @mutate(earn_quarter=unitprice*quantity)
+ @summarise(sum_quarter=sum(earn_quarter))
+ @mutate(log_sum_quarter=log(sum_quarter))
+ @ungroup
+ @arrange(quarter)
+end
+```
+#### 5.2.4  year data
+```{julia}
+year_sales=@chain df5_2 begin
+ @group_by(year)
+ @mutate(earn_year=unitprice*quantity)
+ @summarise(sum_year=sum(earn_year))
+ @mutate(log_sum_year=log(sum_year))
+ @ungroup
+ @arrange(year)
+end
+```
+
+```{julia}
+let
+    set_aog_theme!()
+    df = (week=weekly_sales.week, sales=weekly_sales.log_sum_weekly)
+    plt = data(df) * mapping(:week, :sales) 
+    draw(plt * visual(Lines)) # plot as heatmap (the default)
+end
+```
+
+```{julia}
+let
+    set_aog_theme!()
+    df = (month=monthly_sales.month, sales=monthly_sales.log_sum_monthly)
+    plt = data(df) * mapping(:month, :sales) 
+    draw(plt * visual(BarPlot)) # plot as heatmap (the default)
+end
+```
+
+```{julia}
+let
+    set_aog_theme!()
+    df = (quarter=quarter_sales.quarter, sales=quarter_sales.sum_quarter)
+    plt = data(df) * mapping(:quarter, :sales) 
+    draw(plt * visual(BarPlot)) # plot as heatmap (the default)
+end
+```
+
+
+
+
+
+
+

@@ -176,3 +176,18 @@ function plot_bar2(df::AbstractDataFrame)
 end
 plot_bar2(home_goals_vs_arsenal)
 ```
+
+<!-- ```{julia}
+data(df6) * visual(BarPlot) *
+    mapping(:referee, [:yellow_card])|> draw
+``` -->
+
+```{julia}
+function plot_refree(df::AbstractDataFrame)
+    axis = (width = 225, height = 225)
+    referee_frequency = data(df) * frequency() * mapping(:refree)
+    draw(referee_frequency; axis = axis)
+end
+
+```
+
