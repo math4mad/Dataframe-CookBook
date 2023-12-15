@@ -1,0 +1,83 @@
+---
+title: "discover more olympic games"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "olympic-games.jpg"
+---
+
+
+:::{.callout-warning title="Part 1"}
+# Data PreProcessing
+:::
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+athlete_events =load_csv("athlete_events",false)
+noc_regions =load_csv("noc_regions",false)
+@pipe names(athlete_events )|>lowercase.(_)|>rename!(athlete_events ,_);
+@pipe names(noc_regions )|>lowercase.(_)|>rename!(noc_regions ,_);
+
+```
+
+
+## 3. peek data
+```{julia}
+@chain athlete_events begin
+  @slice(1:5)
+end
+```
+```{julia}
+@chain noc_regions begin
+  @slice(1:5)
+end
+```
+
+## 4. describe data
+```{julia}
+ @pipe describe(athlete_events)|>select(_,[:variable,:nmissing,:eltype])
+```
+```{julia}
+ @pipe describe(noc_regions)|>select(_,[:variable,:nmissing,:eltype])
+```
+
+
+## 5. shape of dataset
+```{julia}
+  size.([athlete_events,noc_regions])
+```
+
+## 6. merge dataset  
+
+```{julia}
+df=@left_join(athlete_events,noc_regions)
+first(df,5)
+```
+
+:::{.callout-warning title="Part 2"}
+# Data Analysis 
+:::
+
+## da.1  Distribution of the age of gold medalists
+### 1.1 data process 
+```{julia}
+   age_goldmedal=@chain df begin
+      @filter(medal=="Gold")
+      @select(age)
+   end
+```
+
+### 1.2 plot
+```{julia}
+let
+set_aog_theme!()
+#axis = (width = 225, height = 225)
+plt = data(age_goldmedal) * mapping(:age) *visual(Density)
+draw(plt)
+end
+```
