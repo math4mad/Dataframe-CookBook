@@ -1,0 +1,291 @@
+---
+title: "Hacker Women in Tech - HackerRank Analysis"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "woman-programmer.jpg"
+---
+
+:::{.callout-tip title="ref"}
+ - ref :[Hacker Women in Tech - HackerRank Analysis](https://www.kaggle.com/code/nulldata/hacker-women-in-tech-hackerrank-analysis)
+ - dataset:[HackerRank Developer Survey 2018](https://www.kaggle.com/datasets/hackerrank/developer-survey-2018)
+:::
+
+
+:::{.callout-warning title="part one"}
+## Data Preprocessing
+:::
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv("HackerRank-Developer-Survey-2018-Values",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+
+## 3. peek data
+```{julia}
+@chain df begin
+  @slice(1:5)
+end
+```
+
+## 4. describe data
+```{julia}
+ @pipe describe(df)|>select(_,[:variable,:nmissing,:eltype])|>_[86:95,:]
+```
+
+## 5. shape of dataset
+```{julia}
+  size(df)
+```
+
+
+:::{.callout-warning title="part two"}
+# Data Anslysis
+:::
+
+## da.1 Minority Check
+
+### count of female-male programmers
+```{julia}
+df=clean_df=@chain df begin
+  @filter(q3gender in ["Male","Female"])
+end
+
+let
+set_aog_theme!()
+axis = (width = 225, height = 225)
+gender_frequency = data(clean_df) * frequency() * mapping(:q3gender,color = :q3gender)
+draw(gender_frequency; axis = axis)
+end
+
+```
+
+### precent of female-male programmers
+```{julia}
+percent_data=@chain clean_df begin
+   @group_by(q3gender)
+   @summarize(n=nrow())
+   @mutate(percent=round(n/sum(n)*100,digits=1))
+
+end
+
+```
+```{julia}
+let
+set_aog_theme!()
+axis = (width = 225, height = 400,title="Minority Check")
+gender_frequency = data(percent_data)* mapping(:q3gender,:percent,color = :q3gender)*visual(BarPlot,bar_labels = :y)
+draw(gender_frequency; axis = axis)
+end
+```
+
+
+
+## da.2 Male vs Female Age of Beginning to code
+
+
+### handle data
+```{julia}
+  begin_programm_percent=@chain df begin 
+   @filter(q1agebegincoding !="#NULL!")
+   @group_by(q3gender, q1agebegincoding)
+   @summarize(n=nrow())
+   @ungroup
+   @group_by(q3gender)
+   @mutate(percent=round(n/sum(n)*100,digits=1))
+   @ungroup
+   end
+```
+### by count
+```{julia}
+let
+set_aog_theme!()
+axis = (width = 600, height =300,xticklabelrotation = pi/8)
+plt=data(begin_programm_percent)*mapping(:q1agebegincoding,:n,color = :q3gender, dodge = :q3gender)*visual(BarPlot)
+draw(plt; axis = axis)
+end
+```
+
+### by percent
+
+
+```{julia}
+let
+set_aog_theme!()
+axis = (width = 600, height =300,xticklabelrotation = pi/8)
+plt=data(begin_programm_percent)*mapping(:q1agebegincoding,:percent,color = :q3gender, dodge = :q3gender)*visual(BarPlot;bar_labels = :y)
+draw(plt; axis = axis)
+end
+```
+###  explain
+from first dodge we can see  at the age of bracket of 11 - 15yrs,
+**22.4%** of men  started coding, only **13.8%** of women have done so.
+
+
+## da.3  Does starting age of coding help in continuing coding to College?
+
+
+###  3.1  data processing
+```{julia}
+ college_cs_data=@chain df begin 
+   #@filter(q5degreefocus !="#NULL!")
+   @group_by(q3gender, q5degreefocus)
+   @summarize(n=nrow())
+   @ungroup
+   @group_by(q3gender)
+   @mutate(percent=round(n/sum(n)*100,digits=1))
+   @ungroup
+   
+   end
+```
+
+###   3.2  by counting 
+```{julia}
+# let
+# set_aog_theme!()
+# axis = (width = 600, height = 300,xticklabelrotation = pi/8)
+# plt=data(college_cs_data)*frequency()*mapping(:q5degreefocus,color = :q3gender, dodge = :q3gender)
+# draw(plt; axis = axis)
+# end
+
+let
+set_aog_theme!()
+axis = (width = 600, height =300,xticklabelrotation = pi/8)
+plt=data(college_cs_data)*mapping(:q5degreefocus,:n,color = :q3gender, dodge = :q3gender)*visual(BarPlot)
+draw(plt; axis = axis)
+end
+```
+
+### 3.3 by perecnt
+```{julia}
+let
+set_aog_theme!()
+axis = (width = 600, height =300,xticklabelrotation = pi/8)
+plt=data(college_cs_data)*mapping(:q5degreefocus,:percent,color = :q3gender, dodge = :q3gender)*visual(BarPlot;bar_labels = :y)
+draw(plt; axis = axis)
+end
+```
+
+
+## da.4 top country
+
+
+## da.5 country order by female-to male ratio
+
+### 5.1 data processing
+```{julia}
+df5=@chain clean_df begin
+    @group_by(countrynumeric2)
+    @mutate(count=nrow())
+    @filter(count>50)
+    @ungroup
+    @group_by(countrynumeric2,q3gender)
+    @summarize(count=nrow())
+    @ungroup
+    @pivot_wider(_, names_from = q3gender, values_from = count)
+    @mutate(f2m=round(Female/Male,digits=2))
+    @rename(country=countrynumeric2)
+    @arrange(desc(f2m))
+end
+```
+
+### 5.2  plot 
+```{julia}
+let
+    set_aog_theme!()
+    axis = (width = 1400, height =500,xticklabelrotation = pi/3)
+    plt=data(df5)*mapping(:country,:f2m,color = :country)*visual(BarPlot)
+    draw(plt; axis = axis)
+end
+```
+
+## da.6 What’s that One More other thing in Job Criteria?
+### 6.1 data processing
+```{julia}
+woman_words=@chain df begin
+  @filter(q3gender=="Female")
+  @filter(q0012_other  != "")
+  @select(q0012_other)
+end
+```
+### 6.2 text processing
+```{julia}
+words_df=text_processing(woman_words.q0012_other)
+sort_word_df=@chain words_df begin
+    @filter(freq>1)
+    @arrange(desc(freq))
+end
+
+```
+### 6.3 plot 
+```{julia}
+let
+ set_aog_theme!()
+ axis = (width = 600, height = 300,xticklabelrotation = pi/8)
+ plt=data(sort_word_df)*mapping(:word,:freq;color=:word)* visual(BarPlot)
+ draw(plt;axis = axis)
+end
+```
+
+
+## da.7  n-gram Analysis of Other Expectation
+### 7.1 data processing
+```{julia}
+woman_words_0020=@chain df begin
+  @filter(q3gender=="Female")
+  @select(q0020_other)
+  @filter(q0020_other  != "")
+  
+end
+```
+### 7.2 text processing
+```{julia}
+words_df_0020=text_processing(woman_words_0020.q0020_other)
+sort_word_df_0020=@chain words_df begin
+    @filter(freq>1)
+    @arrange(desc(freq))
+end
+```
+
+### 7.3 plot
+```{julia}
+let
+ set_aog_theme!()
+ axis = (width = 600, height = 300,xticklabelrotation = pi/8)
+ plt=data(sort_word_df_0020)*mapping(:word,:freq;color=:word)* visual(BarPlot)
+ draw(plt;axis = axis)
+end
+```
+
+
+## da.8  Expected Core competencies
+
+```{julia}
+# @chain clean_df begin
+#   @filter(q3gender=="Female")
+#   @summarize(startswith("q21")=nrow())
+# end
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

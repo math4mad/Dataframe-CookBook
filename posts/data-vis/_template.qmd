@@ -1,0 +1,37 @@
+---
+title: "title"
+author: "math4mads"
+date: 2023年12月14日 14:41:23
+categories: [dataframe,visualization,julia,machinelearning]
+image: "name.jpg"
+---
+
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv({snippet:keyword},false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+
+## 3. peek data
+```{julia}
+@chain df begin
+  @slice(1:5)
+end
+```
+
+## 4. describe data
+```{julia}
+ @pipe describe(df)|>select(_,[:variable,:nmissing,:eltype])
+```
+
+## 5. shape of dataset
+```{julia}
+  size(df)
+```

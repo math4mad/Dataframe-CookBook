@@ -2,9 +2,12 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/welcome/filter-by-column-eltype.html",
+      "/posts/data-vis/pokemon-data-analysis.html",
       "/posts/data-vis/index.html",
       "/posts/data-vis/index2.html",
       "/posts/data-vis/index3.html",
+      "/posts/data-vis/hacker-women-in-tech.html",
       "/posts/videogame-analysis/tidier-method.html",
       "/posts/videogame-analysis/index.html",
       "/posts/data-vis/airbnb-data-analysis.html",
@@ -16,7 +19,8 @@
       "/posts/transformation/index.html",
       "/posts/two-way-table/index.html",
       "/posts/mammalsleep/index.html",
-      "/posts/welcome/index.html"
+      "/posts/welcome/index.html",
+      "/posts/data-vis/aerial bombing operations in wwii.html"
     ]
   }
 ]

@@ -1,0 +1,55 @@
+---
+title: "aerial boming operations in world war 2 data analysis"
+author: "math4mads"
+date: 2023年12月14日
+categories: [dataframe,visualization,julia,machinelearning]
+image: "war.jpg"
+---
+
+:::{.callout-note title="info"}
+- ref :[Time Series Prediction Tutorial with EDA](https://www.kaggle.com/code/kanncaa1/time-series-prediction-tutorial-with-eda/notebook)
+:::
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df1 = load_csv("operations",true)
+df2= load_csv("Summary of Weather",true)
+df3= load_csv("Weather Station Locations",true)
+@pipe names(df1)|>lowercase.(_)|>rename!(df1,_)
+@pipe names(df2)|>lowercase.(_)|>rename!(df2,_)
+@pipe names(df3)|>lowercase.(_)|>rename!(df3,_);
+
+```
+```{julia}
+first(df1,5),first(df2,5),first(df3,5)
+```
+
+## clean  boming data
+```{julia}
+@pipe describe(df1)|>select(_,[:variable,:nmissing,:eltype])
+```
+```{julia}
+size(df1)
+```
+
+```{julia}
+@pipe describe(df2)|>select(_,[:variable,:nmissing,:eltype])
+```
+```{julia}
+size(df2)
+```
+
+```{julia}
+@pipe describe(df3)|>select(_,[:variable,:nmissing,:eltype])
+```
+```{julia}
+size(df3)
+```
+
+
+
+

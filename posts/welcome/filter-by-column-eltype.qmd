@@ -1,0 +1,37 @@
+---
+title: "Filter DataFrame Columns by eltype"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+
+---
+
+
+## 1. load package
+```{julia}
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv("airbnb_nyc_2019",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+## 3. describe data
+```{julia}
+ type_df=@pipe describe(df)|>select(_,[:variable,:eltype])
+```
+
+## 4. filter  supertype
+```{julia}
+int_df=@chain type_df begin
+    @filter(isa(eltype,Union{Type{Int64},Type{Float64}}))
+end
+
+
+@eval(Main, myvar =int_df.variable)
+@chain df begin
+    @select(!!myvar)
+end
+```

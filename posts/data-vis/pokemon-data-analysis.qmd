@@ -1,0 +1,116 @@
+---
+title: "Pokemon data analysis"
+author: "math4mads"
+date: "2023-12-15"
+categories: [dataframe,visualization,julia,machinelearning]
+image: "pokemon.jpg"
+---
+
+:::{.callout-note title="info"}
+
+- ref: [Intermediate visualization tutorial using Plotly](https://www.kaggle.com/code/thebrownviking20/intermediate-visualization-tutorial-using-plotly/notebook)
+- dataset: [Pokemon with stats](https://www.kaggle.com/datasets/abcsds/pokemon)
+:::
+
+## 1. load package
+```{julia}
+using Makie
+include("../utils.jl")   # import load_csv method
+
+```
+## 2. load data
+```{julia}
+df =load_csv("pokemon_data",false)
+@pipe names(df)|>lowercase.(_)|>rename!(df,_);
+```
+
+
+## 3. peek data
+```{julia}
+@chain df begin
+  @slice(1:5)
+end
+```
+
+## 4. describe data
+```{julia}
+ @pipe describe(df)|>select(_,[:variable,:nmissing,:eltype])
+```
+
+## 5. shape of dataset
+```{julia}
+  size(df)
+```
+
+## 6. dist plot 
+
+```{julia}
+plt = data(df) * mapping(:hp)
+layers = visual(Hist;normalization=:pdf,bin=10,strokewidth=1,strokecolor=:white) +visual(Density;color=(:green,0.3),strokewidth=1,strokecolor=:red)
+with_theme(theme_ggplot2(), resolution = (600,400)) do
+    layers*plt|> draw
+end
+```
+
+### 6.2 show all stats
+```{julia}
+  function plot_features_boxplot(df::AbstractDataFrame)
+  row,col=size(df)
+  features=names(df)
+  fig=Figure(resolution=(1000,500))
+  ax=Axis(fig[1,1],title="boxplot of features")
+  ax.xlabel="feature";ax.ylabel="counts"
+  ax.xticks=(1:col,features)
+  for (idx,col)  in enumerate(collect(eachcol(df)))
+    boxplot!(ax,fill(idx,row),col)
+  end
+  
+  fig
+end
+
+plot_features_boxplot(df[:,6:11])
+```
+
+
+## 7. Radar plot
+
+```{julia}
+num_df=@chain df begin
+  @select(6:11)
+end
+max_range=@pipe eachcol(num_df)|>maximum.(_)|>round.(_,digits=0)
+cats=names(num_df)
+#show(cats)
+```
+```{julia}
+
+using GMT
+function plot_rader(data)
+    data=Matrix(data)
+    radar(data,labels=cats, annotall=true, marker=:circ, fill=true, show=true, axeslimts=max_range)
+end
+num_df[1:2,:]|>plot_rader
+```
+
+## 8 vilion plot
+```{julia}
+function plot_features_violin(df::AbstractDataFrame)
+  row,col=size(df)
+  features=names(df)
+  fig=Figure(resolution=(1000,500))
+  ax=Axis(fig[1,1],title="boxplot of features")
+  ax.xlabel="feature";ax.ylabel="counts"
+  ax.xticks=(1:col,features)
+  for (idx,col)  in enumerate(collect(eachcol(df)))
+    Makie.violin!(ax,fill(idx,row),col)
+  end
+  
+  fig
+end
+
+plot_features_violin(df[:,6:11])
+```
+
+
+
+

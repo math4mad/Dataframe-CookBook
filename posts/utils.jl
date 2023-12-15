@@ -6,6 +6,7 @@ using Tidier
 using AlgebraOfGraphics
 using StatsBase
 using  HypothesisTests
+using TextAnalysis
 """
     load_csv(str::String)
     读取 csv|>df|>dropmissing
@@ -354,3 +355,19 @@ end
 
 marker_style=(marker=:circle,markersize=12,color=(:green,0.2),strokewidth=1,strokecolor=:black)
 
+
+
+"""
+    text_processing(text_arr)::AbstractDataFrame
+
+输入字符串数组,返回词频 DataFrame{word,count}
+"""
+function text_processing(text_arr)::AbstractDataFrame
+    doc=string(text_arr)|>StringDocument
+    prepare!(doc, strip_articles| strip_numbers|strip_non_letters|strip_stopwords|strip_pronouns)
+    word_freq=ngrams(doc)
+    words_df=DataFrame(word=[keys(word_freq)...],freq=[values(word_freq)...])
+    return  words_df
+ end
+
+@info "loading success!"
